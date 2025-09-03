@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API テストツール - Threads System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+        }
+        
+        button.secondary {
+            background: #48bb78;
+        }
+        
+        button.secondary:hover {
+            background: #38a169;
+        }
+        
+        .response {
+            background: #f7f7f7;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .token-display {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Threads System API テストツール</h1>
+            <p style="margin-top: 10px;">バックエンドAPIの動作確認</p>
+        </div>
+        
+        <div class="content">
+            <!-- 接続状態 -->
+            <div class="section">
+                <h2>📡 サーバー接続状態</h2>
+                <div id="connectionStatus" class="status disconnected">未接続</div>
+                <button onclick="testConnection()">接続テスト</button>
+                <div id="connectionResponse" class="response" style="display: none;"></div>
+            </div>
+            
+            <!-- ユーザー登録 -->
+            <div class="section">
+                <h2>👤 新規ユーザー登録</h2>
+                <div class="form-group">
+                    <label>ユーザー名</label>
+                    <input type="text" id="regUsername" placeholder="例: newuser">
+                </div>
+                <div class="form-group">
+                    <label>メールアドレス</label>
+                    <input type="email" id="regEmail" placeholder="例: user@example.com">
+                </div>
+                <div class="form-group">
+                    <label>パスワード</label>
+                    <input type="password" id="regPassword" placeholder="6文字以上">
+                </div>
+                <button onclick="register()" class="secondary">登録する</button>
+                <div id="registerResponse" class="response" style="display: none;"></div>
+            </div>
+            
+            <!-- ログイン -->
+            <div class="section">
+                <h2>🔐 ログイン</h2>
+                <div class="form-group">
+                    <label>ユーザー名またはメールアドレス</label>
+                    <input type="text" id="loginUsername" value="admin" placeholder="例: admin">
+                </div>
+                <div class="form-group">
+                    <label>パスワード</label>
+                    <input type="password" id="loginPassword" value="admin123" placeholder="パスワード">
+                </div>
+                <button onclick="login()">ログイン</button>
+                <button onclick="fillTestUser()" class="secondary">テストユーザーで入力</button>
+                <div id="loginResponse" class="response" style="display: none;"></div>
+                <div id="tokenDisplay" class="token-display" style="display: none;">
+                    <strong>取得したトークン:</strong><br>
+                    <span id="tokenValue"></span>
+                </div>
+            </div>
+            
+            <!-- トークン検証 -->
+            <div class="section">
+                <h2>✅ トークン検証</h2>
+                <button onclick="verifyToken()">現在のトークンを検証</button>
+                <div id="verifyResponse" class="response" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let currentToken = '';
+        
+        // 接続テスト
+        async function testConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/test`);
+                const data = await response.json();
+                
+                document.getElementById('connectionStatus').className = 'status connected';
+                document.getElementById('connectionStatus').textContent = '接続済み';
+                document.getElementById('connectionResponse').style.display = 'block';
+                document.getElementById('connectionResponse').className = 'response success';
+                document.getElementById('connectionResponse').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('connectionStatus').className = 'status disconnected';
+                document.getElementById('connectionStatus').textContent = '接続失敗';
+                document.getElementById('connectionResponse').style.display = 'block';
+                document.getElementById('connectionResponse').className = 'response error';
+                document.getElementById('connectionResponse').textContent = 'エラー: サーバーに接続できません。\nサーバーが起動していることを確認してください。\n\nコマンド: npm run dev';
+            }
+        }
+        
+        // ユーザー登録
+        async function register() {
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            
+            if (!username || !email || !password) {
+                alert('すべての項目を入力してください');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('registerResponse').style.display = 'block';
+                
+                if (response.ok) {
+                    document.getElementById('registerResponse').className = 'response success';
+                    if (data.token) {
+                        currentToken = data.token;
+                    }
+                } else {
+                    document.getElementById('registerResponse').className = 'response error';
+                }
+                
+                document.getElementById('registerResponse').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('registerResponse').style.display = 'block';
+                document.getElementById('registerResponse').className = 'response error';
+                document.getElementById('registerResponse').textContent = 'エラー: ' + error.message;
+            }
+        }
+        
+        // ログイン
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                alert('ユーザー名とパスワードを入力してください');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('loginResponse').style.display = 'block';
+                
+                if (response.ok) {
+                    document.getElementById('loginResponse').className = 'response success';
+                    if (data.token) {
+                        currentToken = data.token;
+                        document.getElementById('tokenDisplay').style.display = 'block';
+                        document.getElementById('tokenValue').textContent = currentToken;
+                    }
+                } else {
+                    document.getElementById('loginResponse').className = 'response error';
+                }
+                
+                document.getElementById('loginResponse').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('loginResponse').style.display = 'block';
+                document.getElementById('loginResponse').className = 'response error';
+                document.getElementById('loginResponse').textContent = 'エラー: ' + error.message;
+            }
+        }
+        
+        // トークン検証
+        async function verifyToken() {
+            if (!currentToken) {
+                alert('先にログインしてトークンを取得してください');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/verify`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('verifyResponse').style.display = 'block';
+                
+                if (response.ok) {
+                    document.getElementById('verifyResponse').className = 'response success';
+                } else {
+                    document.getElementById('verifyResponse').className = 'response error';
+                }
+                
+                document.getElementById('verifyResponse').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('verifyResponse').style.display = 'block';
+                document.getElementById('verifyResponse').className = 'response error';
+                document.getElementById('verifyResponse').textContent = 'エラー: ' + error.message;
+            }
+        }
+        
+        // テストユーザー入力
+        function fillTestUser() {
+            document.getElementById('loginUsername').value = 'testuser';
+            document.getElementById('loginPassword').value = 'test123';
+        }
+        
+        // ページ読み込み時に接続テスト
+        window.onload = function() {
+            testConnection();
+        };
+    </script>
+</body>
+</html>
