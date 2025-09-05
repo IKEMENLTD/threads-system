@@ -46,7 +46,8 @@ app.get('/api/test', (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     name: 'Threads System Backend',
-    version: '1.0.0',
+    version: '1.0.1',
+    deployed: new Date().toISOString(),
     endpoints: {
       test: '/api/test',
       auth: {
