@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -10,28 +9,38 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB接続（Railway環境変数に対応）
-const mongoUri = process.env.MONGODB_URI || 
-                 process.env.MONGO_URL || 
-                 process.env.DATABASE_URL ||
-                 'mongodb://localhost:27017/threads_system';
+// Supabase接続確認（遅延読み込み）
+const { testConnection } = require('./supabase-setup');
 
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-  .then(() => {
-    console.log('✅ MongoDB connected successfully');
-    console.log('📊 Database:', mongoUri.split('@')[1]?.split('/')[0] || 'localhost');
-  })
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
-    console.log('⚠️  Server will run without database functionality');
-  });
+// 起動時に接続テスト
+(async () => {
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
+    const connected = await testConnection();
+    if (connected) {
+      console.log('📊 Database: Supabase PostgreSQL');
+    }
+  } else {
+    console.log('⚠️  Supabase環境変数が設定されていません');
+    console.log('必要な環境変数: SUPABASE_URL, SUPABASE_ANON_KEY');
+  }
+})();
 
 // ルート設定
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
+
+// ヘルスチェック
+app.get('/api/health', async (req, res) => {
+  const { testConnection } = require('./supabase-setup');
+  const dbConnected = await testConnection();
+  
+  res.json({ 
+    status: 'ok',
+    database: dbConnected ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 // テストルート
 app.get('/api/test', (req, res) => {

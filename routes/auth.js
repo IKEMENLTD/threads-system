@@ -1,7 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
+
+// Supabase関数をインポート
+const { createUser, getUserByEmail } = require('../supabase-setup');
 
 // JWT秘密鍵
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
@@ -19,32 +22,34 @@ router.post('/register', async (req, res) => {
       });
     }
     
+    // パスワード長チェック
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'パスワードは6文字以上必要です' 
+      });
+    }
+    
     // ユーザーが既に存在するかチェック
-    const existingUser = await User.findOne({ 
-      $or: [{ username }, { email }] 
-    });
+    const existingUser = await getUserByEmail(email);
     
     if (existingUser) {
       return res.status(400).json({ 
         success: false,
-        error: 'ユーザー名またはメールアドレスは既に使用されています' 
+        error: 'このメールアドレスは既に使用されています' 
       });
     }
     
-    // 新規ユーザー作成
-    const user = new User({
-      username,
-      email,
-      password,
-      displayName: username
-    });
+    // パスワードをハッシュ化
+    const passwordHash = await bcrypt.hash(password, 10);
     
-    await user.save();
+    // 新規ユーザー作成
+    const user = await createUser(email, username, passwordHash);
     
     // JWT トークン生成
     const token = jwt.sign(
       { 
-        userId: user._id, 
+        userId: user.id, 
         username: user.username,
         role: user.role 
       },
@@ -57,10 +62,9 @@ router.post('/register', async (req, res) => {
       message: 'ユーザー登録が完了しました',
       token,
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName,
         role: user.role
       }
     });
@@ -77,49 +81,40 @@ router.post('/register', async (req, res) => {
 // ログイン
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
     
     // 入力検証
-    if (!username || !password) {
+    if (!email || !password) {
       return res.status(400).json({ 
         success: false,
-        error: 'ユーザー名とパスワードを入力してください' 
+        error: 'メールアドレスとパスワードを入力してください' 
       });
     }
     
-    // ユーザー検索（usernameまたはemailで検索）
-    const user = await User.findOne({
-      $or: [
-        { username: username },
-        { email: username }
-      ]
-    });
+    // ユーザー検索
+    const user = await getUserByEmail(email);
     
     if (!user) {
       return res.status(401).json({ 
         success: false,
-        error: 'ユーザー名またはパスワードが正しくありません' 
+        error: 'メールアドレスまたはパスワードが正しくありません' 
       });
     }
     
     // パスワード検証
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     
     if (!isPasswordValid) {
       return res.status(401).json({ 
         success: false,
-        error: 'ユーザー名またはパスワードが正しくありません' 
+        error: 'メールアドレスまたはパスワードが正しくありません' 
       });
     }
-    
-    // 最終ログイン時刻を更新
-    user.lastLogin = new Date();
-    await user.save();
     
     // JWT トークン生成
     const token = jwt.sign(
       { 
-        userId: user._id, 
+        userId: user.id, 
         username: user.username,
         role: user.role 
       },
@@ -132,12 +127,11 @@ router.post('/login', async (req, res) => {
       message: 'ログインに成功しました',
       token,
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName,
         role: user.role,
-        createdAt: user.createdAt
+        createdAt: user.created_at
       }
     });
     
@@ -163,23 +157,13 @@ router.get('/verify', async (req, res) => {
     }
     
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.userId).select('-password');
-    
-    if (!user) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'ユーザーが見つかりません' 
-      });
-    }
     
     res.json({
       success: true,
       user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        displayName: user.displayName,
-        role: user.role
+        id: decoded.userId,
+        username: decoded.username,
+        role: decoded.role
       }
     });
     
