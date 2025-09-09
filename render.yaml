@@ -5,7 +5,8 @@ services:
     runtime: node
     region: singapore
     plan: free
-    buildCommand: npm install
+    rootDir: backend
+    buildCommand: npm install && cp -r ../*.html ../css ../js ../assets . 2>/dev/null || true
     startCommand: npm start
     envVars:
       - key: NODE_ENV

@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // フロントエンドの静的ファイルを配信
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(__dirname));
 
 // Supabase接続確認（遅延読み込み）
 const { testConnection } = require('./supabase-setup');
@@ -57,7 +57,7 @@ app.get('/api/test', (req, res) => {
 
 // ルートパス - フロントエンドのindex.htmlを配信
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // API情報エンドポイント
@@ -102,11 +102,11 @@ app.use((req, res) => {
   const requestedFile = req.path.slice(1); // Remove leading slash
   
   if (htmlFiles.includes(requestedFile)) {
-    return res.sendFile(path.join(__dirname, '..', requestedFile));
+    return res.sendFile(path.join(__dirname, requestedFile));
   }
   
   // その他はindex.htmlにフォールバック（SPAルーティング）
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
