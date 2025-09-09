@@ -1,0 +1,4 @@
+user_id,username,password_hash,threads_username,threads_token,created_at,last_login,is_active
+1,demo,$2b$10$xxxxxDEMOHASHxxxxx,demo_threads,,2024-01-01 09:00:00,2024-01-08 14:30:00,TRUE
+2,admin,$2b$10$xxxxxADMINHASHxxxxx,admin_threads,,2024-01-01 09:00:00,2024-01-08 10:00:00,TRUE
+3,test_user,$2b$10$xxxxxTESTHASHxxxxx,test_threads,,2024-01-05 10:00:00,2024-01-07 15:00:00,TRUE

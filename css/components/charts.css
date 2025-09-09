@@ -1,0 +1,125 @@
+.chart-container {
+    position: relative;
+    width: 100%;
+}
+
+.chart-wrapper {
+    position: relative;
+    width: 100%;
+    padding: var(--spacing-md);
+}
+
+.chart-wrapper canvas {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.mini-chart {
+    position: relative;
+    width: 100%;
+    height: 60px;
+}
+
+.mini-chart canvas {
+    width: 100% !important;
+    height: 60px !important;
+}
+
+.chart-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+}
+
+.chart-container.loading .chart-loading {
+    display: block;
+}
+
+.chart-container.loading .chart-wrapper {
+    opacity: 0.3;
+}
+
+.chart-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: var(--color-gray-500);
+    font-size: var(--font-size-sm);
+}
+
+.chart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: var(--color-gray-400);
+}
+
+.chart-empty-icon {
+    font-size: var(--font-size-4xl);
+    margin-bottom: var(--spacing-md);
+}
+
+.chart-empty-text {
+    font-size: var(--font-size-sm);
+}
+
+.chart-tooltip {
+    position: absolute;
+    background: var(--color-gray-900);
+    color: var(--color-white);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.chart-tooltip.show {
+    opacity: 1;
+}
+
+.chart-controls {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.chart-control-btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-gray-100);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-600);
+    transition: var(--transition-base);
+}
+
+.chart-control-btn:hover {
+    background: var(--color-gray-200);
+    color: var(--color-gray-900);
+}
+
+.chart-control-btn.active {
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+@media (max-width: 768px) {
+    .chart-wrapper {
+        padding: var(--spacing-sm);
+    }
+    
+    .main-chart .chart-wrapper {
+        height: 250px;
+    }
+    
+    .half-chart .chart-wrapper {
+        height: 200px;
+    }
+}

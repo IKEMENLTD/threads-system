@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ダッシュボード - Threads System</title>
+    <?!= include('styles') ?>
+</head>
+<body>
+    <div class="app">
+        <?!= include('sidebar') ?>
+        
+        <main class="main-content">
+            <header class="header">
+                <h1>📊 ダッシュボード</h1>
+                <div class="header-actions">
+                    <span id="currentDateTime"></span>
+                    <span id="userDisplay"></span>
+                </div>
+            </header>
+            
+            <div class="dashboard-content">
+                <!-- 統計カード -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-info">
+                            <h3>総投稿数</h3>
+                            <p class="stat-value" id="totalPosts">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">👁️</div>
+                        <div class="stat-info">
+                            <h3>総インプレッション</h3>
+                            <p class="stat-value" id="totalImpressions">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">❤️</div>
+                        <div class="stat-info">
+                            <h3>総いいね数</h3>
+                            <p class="stat-value" id="totalLikes">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">💬</div>
+                        <div class="stat-info">
+                            <h3>総コメント数</h3>
+                            <p class="stat-value" id="totalComments">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- グラフエリア -->
+                <div class="chart-container">
+                    <h2>週間パフォーマンス</h2>
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                
+                <!-- 最近の投稿 -->
+                <div class="recent-posts">
+                    <h2>最近の投稿</h2>
+                    <div id="recentPostsList"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <?!= include('scripts') ?>
+    
+    <script>
+        const BASE_URL = '<?= ScriptApp.getService().getUrl() ?>';
+        const TOKEN = localStorage.getItem('sessionToken');
+        
+        // 初期化
+        async function initDashboard() {
+            if (!TOKEN) {
+                window.location.href = BASE_URL + '?page=login';
+                return;
+            }
+            
+            updateUserDisplay();
+            updateDateTime();
+            await loadDashboardData();
+        }
+        
+        function updateUserDisplay() {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            document.getElementById('userDisplay').textContent = userData.displayName || 'Guest';
+        }
+        
+        function updateDateTime() {
+            const now = new Date();
+            const formatted = now.toLocaleString('ja-JP', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('currentDateTime').textContent = formatted;
+        }
+        
+        async function loadDashboardData() {
+            try {
+                // 投稿データ取得
+                const postsResponse = await fetch(BASE_URL + '?action=api&endpoint=posts&token=' + TOKEN);
+                const postsData = await postsResponse.json();
+                
+                // 分析データ取得
+                const analyticsResponse = await fetch(BASE_URL + '?action=api&endpoint=analytics&token=' + TOKEN);
+                const analyticsData = await analyticsResponse.json();
+                
+                // 統計更新
+                updateStats(postsData, analyticsData);
+                
+                // グラフ描画
+                drawChart(analyticsData);
+                
+                // 最近の投稿表示
+                displayRecentPosts(postsData.posts);
+                
+            } catch (error) {
+                console.error('データ取得エラー:', error);
+            }
+        }
+        
+        function updateStats(postsData, analyticsData) {
+            // サンプルデータで更新
+            document.getElementById('totalPosts').textContent = '127';
+            document.getElementById('totalImpressions').textContent = '45.2K';
+            document.getElementById('totalLikes').textContent = '3,891';
+            document.getElementById('totalComments').textContent = '892';
+        }
+        
+        function drawChart(data) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            // Chart.jsを使用（簡易実装）
+            ctx.fillStyle = '#667eea';
+            ctx.fillRect(50, 100, 60, 150);
+            ctx.fillRect(130, 80, 60, 170);
+            ctx.fillRect(210, 120, 60, 130);
+            ctx.fillRect(290, 90, 60, 160);
+            ctx.fillRect(370, 110, 60, 140);
+            ctx.fillRect(450, 70, 60, 180);
+            ctx.fillRect(530, 100, 60, 150);
+        }
+        
+        function displayRecentPosts(posts) {
+            const container = document.getElementById('recentPostsList');
+            
+            const samplePosts = [
+                { title: '新機能リリース！', status: 'published', likes: 234 },
+                { title: '週末セールのお知らせ', status: 'scheduled', likes: 0 },
+                { title: 'メンテナンス完了', status: 'published', likes: 189 }
+            ];
+            
+            container.innerHTML = samplePosts.map(post => `
+                <div class="post-item">
+                    <div class="post-title">${post.title}</div>
+                    <div class="post-meta">
+                        <span class="post-status ${post.status}">${post.status}</span>
+                        <span class="post-likes">❤️ ${post.likes}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 初期化実行
+        initDashboard();
+        
+        // 定期更新
+        setInterval(updateDateTime, 60000);
+        setInterval(loadDashboardData, 300000); // 5分ごと
+    </script>
+</body>
+</html>

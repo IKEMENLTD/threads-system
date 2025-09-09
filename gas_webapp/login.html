@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - Threads System</title>
+    <?!= include('styles') ?>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>🧵 Threads System</h1>
+                <p>TRUE ULTIMATE Ver2.0</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">ユーザー名</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">パスワード</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="rememberMe" name="rememberMe">
+                        <span>ログイン状態を保持する</span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    ログイン
+                </button>
+            </form>
+            
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+    </div>
+    
+    <script>
+        const BASE_URL = '<?= ScriptApp.getService().getUrl() ?>';
+        
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                action: 'login',
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+            
+            try {
+                const response = await fetch(BASE_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // セッションをlocalStorageに保存
+                    localStorage.setItem('sessionToken', result.token);
+                    localStorage.setItem('userData', JSON.stringify(result.user));
+                    
+                    // ダッシュボードへリダイレクト
+                    window.location.href = BASE_URL + '?page=dashboard';
+                } else {
+                    document.getElementById('errorMessage').textContent = 
+                        result.error || 'ログインに失敗しました';
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 
+                    'エラーが発生しました: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

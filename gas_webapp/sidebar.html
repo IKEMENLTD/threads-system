@@ -1,0 +1,49 @@
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2>🧵 Threads System</h2>
+        <p>Ver 2.0</p>
+    </div>
+    
+    <div class="nav-menu">
+        <a href="<?= ScriptApp.getService().getUrl() ?>?page=dashboard" 
+           class="nav-item <?= (page === 'dashboard') ? 'active' : '' ?>">
+            📊 ダッシュボード
+        </a>
+        
+        <a href="<?= ScriptApp.getService().getUrl() ?>?page=posts" 
+           class="nav-item <?= (page === 'posts') ? 'active' : '' ?>">
+            📝 投稿管理
+        </a>
+        
+        <a href="<?= ScriptApp.getService().getUrl() ?>?page=schedule" 
+           class="nav-item <?= (page === 'schedule') ? 'active' : '' ?>">
+            📅 スケジュール
+        </a>
+        
+        <a href="<?= ScriptApp.getService().getUrl() ?>?page=analytics" 
+           class="nav-item <?= (page === 'analytics') ? 'active' : '' ?>">
+            📈 分析
+        </a>
+        
+        <a href="<?= ScriptApp.getService().getUrl() ?>?page=settings" 
+           class="nav-item <?= (page === 'settings') ? 'active' : '' ?>">
+            ⚙️ 設定
+        </a>
+        
+        <hr style="margin: 20px; border: none; border-top: 1px solid var(--border-color);">
+        
+        <a href="#" onclick="logout()" class="nav-item">
+            🚪 ログアウト
+        </a>
+    </div>
+</nav>
+
+<script>
+function logout() {
+    if (confirm('ログアウトしますか？')) {
+        localStorage.removeItem('sessionToken');
+        localStorage.removeItem('userData');
+        window.location.href = '<?= ScriptApp.getService().getUrl() ?>?page=login';
+    }
+}
+</script>

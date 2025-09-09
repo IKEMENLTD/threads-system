@@ -1,0 +1,6 @@
+schedule_id,post_id,scheduled_time,scheduled_date,status,retry_count,last_error
+sch_1704067200001,post_1704067200003,14:00,2024-01-13,pending,0,
+sch_1704067200002,post_1704067200006,09:00,2024-01-09,pending,0,
+sch_1704067200003,post_1704067200008,15:00,2024-01-10,pending,0,
+sch_1704067200004,post_1704067200009,10:00,2024-01-11,pending,0,
+sch_1704067200005,post_1704067200010,18:00,2024-01-12,failed,3,API connection timeout

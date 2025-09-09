@@ -1,0 +1,123 @@
+.main-header {
+    height: var(--header-height);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: var(--blur-md);
+    border-bottom: 1px solid var(--color-gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-2xl);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-index-dropdown);
+    transition: all var(--transition-base);
+}
+
+.main-header.scrolled {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 18px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: all var(--transition-fast);
+}
+
+.menu-toggle:hover {
+    transform: scale(1.1);
+}
+
+.menu-line {
+    width: 100%;
+    height: 2px;
+    background: var(--color-gray-700);
+    transition: var(--transition-base);
+}
+
+.menu-toggle.active .menu-line:first-child {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menu-toggle.active .menu-line:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active .menu-line:last-child {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+}
+
+.current-date {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.user-name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-700);
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: var(--gradient-primary);
+    color: var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    animation: pulse 2s infinite;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.user-avatar:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: flex;
+    }
+    
+    .main-header {
+        padding: 0 var(--spacing-lg);
+    }
+    
+    .current-date {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-header {
+        padding: 0 var(--spacing-md);
+    }
+    
+    .user-name {
+        display: none;
+    }
+}

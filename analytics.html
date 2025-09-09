@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="アナリティクス - TRUE ULTIMATE THREADS SYSTEM">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>アナリティクス - TRUE ULTIMATE THREADS SYSTEM</title>
+    
+    <link rel="stylesheet" href="css/base/reset.css">
+    <link rel="stylesheet" href="css/base/common.css">
+    <link rel="stylesheet" href="css/base/responsive.css">
+    <link rel="stylesheet" href="css/components/sidebar.css">
+    <link rel="stylesheet" href="css/components/header.css">
+    <link rel="stylesheet" href="css/components/charts.css">
+    <link rel="stylesheet" href="css/pages/analytics.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">
+                    <span class="logo-main">TRUE ULTIMATE</span>
+                    <span class="logo-sub">THREADS SYSTEM</span>
+                </h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">▣</span>
+                    <span class="nav-text">ダッシュボード</span>
+                </a>
+                <a href="posts.html" class="nav-item">
+                    <span class="nav-icon">▤</span>
+                    <span class="nav-text">投稿管理</span>
+                </a>
+                <a href="schedule.html" class="nav-item">
+                    <span class="nav-icon">◷</span>
+                    <span class="nav-text">スケジュール</span>
+                </a>
+                <a href="analytics.html" class="nav-item active">
+                    <span class="nav-icon">◈</span>
+                    <span class="nav-text">アナリティクス</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span class="nav-icon">◉</span>
+                    <span class="nav-text">設定</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="logout-btn">
+                    <span class="logout-icon">↗</span>
+                    <span class="logout-text">ログアウト</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="main-container">
+            <header class="main-header">
+                <button class="menu-toggle" aria-label="メニューを開く" aria-expanded="false">
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                </button>
+                
+                <div class="header-info">
+                    <span class="current-date"></span>
+                    <div class="user-info">
+                        <span class="user-name">ユーザー</span>
+                        <div class="user-avatar">U</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h2>アナリティクス</h2>
+                        <p class="page-subtitle">パフォーマンス分析と統計</p>
+                    </div>
+                    <div class="period-selector">
+                        <button class="period-btn active" data-period="7days">7日間</button>
+                        <button class="period-btn" data-period="30days">30日間</button>
+                        <button class="period-btn" data-period="3months">3ヶ月</button>
+                        <button class="period-btn" data-period="year">1年</button>
+                    </div>
+                </div>
+
+                <section class="metrics-overview">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h3 class="metric-title">総インプレッション</h3>
+                            <span class="metric-trend up">↑ 12.5%</span>
+                        </div>
+                        <div class="metric-value">234,567</div>
+                        <div class="metric-chart mini-chart" id="impressionsChart"></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h3 class="metric-title">エンゲージメント率</h3>
+                            <span class="metric-trend up">↑ 8.3%</span>
+                        </div>
+                        <div class="metric-value">4.7%</div>
+                        <div class="metric-chart mini-chart" id="engagementChart"></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h3 class="metric-title">フォロワー増加</h3>
+                            <span class="metric-trend up">↑ 156</span>
+                        </div>
+                        <div class="metric-value">+892</div>
+                        <div class="metric-chart mini-chart" id="followersChart"></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h3 class="metric-title">クリック率</h3>
+                            <span class="metric-trend down">↓ 2.1%</span>
+                        </div>
+                        <div class="metric-value">2.3%</div>
+                        <div class="metric-chart mini-chart" id="clickRateChart"></div>
+                    </div>
+                </section>
+
+                <section class="charts-section">
+                    <div class="chart-container main-chart">
+                        <div class="chart-header">
+                            <h3 class="chart-title">パフォーマンス推移</h3>
+                            <div class="chart-legend">
+                                <span class="legend-item impressions">インプレッション</span>
+                                <span class="legend-item engagement">エンゲージメント</span>
+                                <span class="legend-item clicks">クリック</span>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-row">
+                        <div class="chart-container half-chart">
+                            <div class="chart-header">
+                                <h3 class="chart-title">投稿タイプ別パフォーマンス</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="postTypeChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-container half-chart">
+                            <div class="chart-header">
+                                <h3 class="chart-title">時間帯別エンゲージメント</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="timeEngagementChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="top-posts-section">
+                    <div class="section-header">
+                        <h3 class="section-title">トップパフォーマンス投稿</h3>
+                        <button class="btn-text">詳細レポート →</button>
+                    </div>
+                    <div class="top-posts-table">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>投稿</th>
+                                    <th>日時</th>
+                                    <th>インプレッション</th>
+                                    <th>エンゲージメント</th>
+                                    <th>クリック</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topPostsTable">
+                                <tr>
+                                    <td class="post-title">新商品リリースのお知らせ</td>
+                                    <td>2025/1/7 15:00</td>
+                                    <td>12,456</td>
+                                    <td>856</td>
+                                    <td>234</td>
+                                </tr>
+                                <tr>
+                                    <td class="post-title">週末限定セール開催中</td>
+                                    <td>2025/1/5 10:00</td>
+                                    <td>10,234</td>
+                                    <td>745</td>
+                                    <td>198</td>
+                                </tr>
+                                <tr>
+                                    <td class="post-title">お客様の声をご紹介</td>
+                                    <td>2025/1/4 18:30</td>
+                                    <td>8,567</td>
+                                    <td>623</td>
+                                    <td>156</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="export-section">
+                    <div class="export-actions">
+                        <button class="btn-secondary" id="exportPDF">
+                            <span class="btn-icon">📄</span>
+                            PDFレポート
+                        </button>
+                        <button class="btn-secondary" id="exportCSV">
+                            <span class="btn-icon">📊</span>
+                            CSVダウンロード
+                        </button>
+                        <button class="btn-secondary" id="shareReport">
+                            <span class="btn-icon">🔗</span>
+                            レポート共有
+                        </button>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <div class="mobile-overlay"></div>
+    </div>
+
+    <script src="js/core/config.js"></script>
+    <script src="js/core/constants.js"></script>
+    <script src="js/utils/common.js"></script>
+    <script src="js/data/storage-manager.js"></script>
+    <script src="js/data/session-manager.js"></script>
+    <script src="js/data/analytics-data.js"></script>
+    <script src="js/ui/page-base.js"></script>
+    <script src="js/ui/chart-manager.js"></script>
+    <script src="js/pages/analytics.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

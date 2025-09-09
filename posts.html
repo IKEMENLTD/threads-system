@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="投稿管理 - TRUE ULTIMATE THREADS SYSTEM">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>投稿管理 - TRUE ULTIMATE THREADS SYSTEM</title>
+    
+    <link rel="stylesheet" href="css/base/reset.css">
+    <link rel="stylesheet" href="css/base/common.css">
+    <link rel="stylesheet" href="css/base/responsive.css">
+    <link rel="stylesheet" href="css/components/sidebar.css">
+    <link rel="stylesheet" href="css/components/header.css">
+    <link rel="stylesheet" href="css/components/forms.css">
+    <link rel="stylesheet" href="css/components/modals.css">
+    <link rel="stylesheet" href="css/pages/posts.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">
+                    <span class="logo-main">TRUE ULTIMATE</span>
+                    <span class="logo-sub">THREADS SYSTEM</span>
+                </h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">▣</span>
+                    <span class="nav-text">ダッシュボード</span>
+                </a>
+                <a href="posts.html" class="nav-item active">
+                    <span class="nav-icon">▤</span>
+                    <span class="nav-text">投稿管理</span>
+                </a>
+                <a href="schedule.html" class="nav-item">
+                    <span class="nav-icon">◷</span>
+                    <span class="nav-text">スケジュール</span>
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <span class="nav-icon">◈</span>
+                    <span class="nav-text">アナリティクス</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span class="nav-icon">◉</span>
+                    <span class="nav-text">設定</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="logout-btn">
+                    <span class="logout-icon">↗</span>
+                    <span class="logout-text">ログアウト</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="main-container">
+            <header class="main-header">
+                <button class="menu-toggle" aria-label="メニューを開く" aria-expanded="false">
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                </button>
+                
+                <div class="header-info">
+                    <span class="current-date"></span>
+                    <div class="user-info">
+                        <span class="user-name">ユーザー</span>
+                        <div class="user-avatar">U</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h2>投稿管理</h2>
+                        <p class="page-subtitle">投稿の作成、編集、管理</p>
+                    </div>
+                    <button class="btn-primary" id="newPostBtn">
+                        <span class="btn-icon">+</span>
+                        新規投稿
+                    </button>
+                </div>
+
+                <div class="posts-container">
+                    <section class="posts-filters">
+                        <div class="filter-group">
+                            <label for="statusFilter" class="filter-label">ステータス</label>
+                            <select id="statusFilter" class="filter-select">
+                                <option value="all">すべて</option>
+                                <option value="draft">下書き</option>
+                                <option value="scheduled">予約済み</option>
+                                <option value="published">公開済み</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="dateFilter" class="filter-label">期間</label>
+                            <select id="dateFilter" class="filter-select">
+                                <option value="all">すべて</option>
+                                <option value="today">今日</option>
+                                <option value="week">今週</option>
+                                <option value="month">今月</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <input type="text" id="searchPosts" class="filter-search" placeholder="投稿を検索...">
+                        </div>
+                    </section>
+
+                    <section class="posts-grid" id="postsGrid">
+                        <div class="post-card">
+                            <div class="post-card-header">
+                                <span class="post-status-badge published">公開済み</span>
+                                <button class="post-menu-btn" aria-label="メニュー">⋮</button>
+                            </div>
+                            <div class="post-card-body">
+                                <h3 class="post-card-title">新サービスリリースのお知らせ</h3>
+                                <p class="post-card-excerpt">本日より新しいサービスを開始いたします。詳細はウェブサイトをご覧ください...</p>
+                                <div class="post-card-meta">
+                                    <span class="post-date">2025/1/8 14:30</span>
+                                    <div class="post-stats">
+                                        <span>♥ 124</span>
+                                        <span>↻ 32</span>
+                                        <span>💬 18</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="post-card-footer">
+                                <button class="btn-text">編集</button>
+                                <button class="btn-text">複製</button>
+                                <button class="btn-text danger">削除</button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <div class="modal" id="postModal" aria-hidden="true">
+            <div class="modal-backdrop" id="modalBackdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modalTitle">新規投稿</h3>
+                    <button class="modal-close" id="modalClose" aria-label="閉じる">×</button>
+                </div>
+                <div class="modal-body">
+                    <form id="postForm" class="post-form">
+                        <div class="form-group">
+                            <label for="postTitle" class="form-label">タイトル</label>
+                            <input type="text" id="postTitle" class="form-input" placeholder="投稿タイトルを入力">
+                        </div>
+                        <div class="form-group">
+                            <label for="postContent" class="form-label">内容 <span class="char-count" id="charCount">0/500</span></label>
+                            <textarea id="postContent" class="form-textarea" rows="8" maxlength="500" placeholder="投稿内容を入力"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="postHashtags" class="form-label">ハッシュタグ</label>
+                            <input type="text" id="postHashtags" class="form-input" placeholder="#ハッシュタグ （スペースで区切る）">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="postSchedule" class="form-label">投稿日時</label>
+                                <input type="datetime-local" id="postSchedule" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="postStatus" class="form-label">ステータス</label>
+                                <select id="postStatus" class="form-select">
+                                    <option value="draft">下書き</option>
+                                    <option value="scheduled">予約投稿</option>
+                                    <option value="publish">今すぐ投稿</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="cancelPost">キャンセル</button>
+                    <button class="btn-primary" id="savePost">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-overlay"></div>
+    </div>
+
+    <script src="js/core/config.js"></script>
+    <script src="js/core/constants.js"></script>
+    <script src="js/utils/common.js"></script>
+    <script src="js/utils/input-validator.js"></script>
+    <script src="js/data/storage-manager.js"></script>
+    <script src="js/data/session-manager.js"></script>
+    <script src="js/data/posts-data.js"></script>
+    <script src="js/ui/page-base.js"></script>
+    <script src="js/ui/modal-controller.js"></script>
+    <script src="js/pages/posts.js"></script>
+</body>
+</html>

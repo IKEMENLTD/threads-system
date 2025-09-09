@@ -1,0 +1,16 @@
+key,value,type,description,updated_at
+auto_publish,true,boolean,自動公開の有効/無効,2024-01-08 09:00:00
+default_status,draft,string,新規投稿のデフォルトステータス,2024-01-01 09:00:00
+max_retries,3,number,投稿失敗時の最大リトライ回数,2024-01-01 09:00:00
+schedule_check_interval,5,number,スケジュールチェック間隔（分）,2024-01-01 09:00:00
+archive_after_days,30,number,アーカイブまでの日数,2024-01-01 09:00:00
+threads_api_endpoint,https://graph.threads.net/v1.0,string,Threads API エンドポイント,2024-01-01 09:00:00
+max_hashtags,10,number,最大ハッシュタグ数,2024-01-01 09:00:00
+post_title_max_length,100,number,投稿タイトルの最大文字数,2024-01-01 09:00:00
+post_content_max_length,500,number,投稿内容の最大文字数,2024-01-01 09:00:00
+timezone,Asia/Tokyo,string,タイムゾーン設定,2024-01-01 09:00:00
+language,ja,string,言語設定,2024-01-01 09:00:00
+analytics_retention_days,365,number,分析データ保持日数,2024-01-01 09:00:00
+enable_notifications,true,boolean,通知の有効/無効,2024-01-05 10:00:00
+notification_email,admin@example.com,string,通知先メールアドレス,2024-01-05 10:00:00
+debug_mode,false,boolean,デバッグモードの有効/無効,2024-01-01 09:00:00
