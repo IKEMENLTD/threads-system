@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -8,6 +9,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// フロントエンドの静的ファイルを配信
+app.use(express.static(path.join(__dirname, '..')));
 
 // Supabase接続確認（遅延読み込み）
 const { testConnection } = require('./supabase-setup');
@@ -51,8 +55,13 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// ルートパス
+// ルートパス - フロントエンドのindex.htmlを配信
 app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
+
+// API情報エンドポイント
+app.get('/api', (req, res) => {
   res.json({
     name: 'Threads System Backend',
     version: '1.0.1',
@@ -78,12 +87,26 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404ハンドリング
+// SPAルーティング対応 - HTMLファイルまたは404
 app.use((req, res) => {
-  res.status(404).json({ 
-    error: 'Not Found',
-    path: req.path 
-  });
+  // APIリクエストの場合はJSONエラーを返す
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ 
+      error: 'API Not Found',
+      path: req.path 
+    });
+  }
+  
+  // HTMLファイルの場合は対応するファイルを返す、なければindex.htmlにフォールバック
+  const htmlFiles = ['login.html', 'dashboard.html', 'posts.html', 'schedule.html', 'analytics.html', 'settings.html'];
+  const requestedFile = req.path.slice(1); // Remove leading slash
+  
+  if (htmlFiles.includes(requestedFile)) {
+    return res.sendFile(path.join(__dirname, '..', requestedFile));
+  }
+  
+  // その他はindex.htmlにフォールバック（SPAルーティング）
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
