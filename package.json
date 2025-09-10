@@ -1,0 +1,17 @@
+{
+  "name": "threads-system",
+  "version": "1.0.0",
+  "description": "Threads System - Frontend & Backend Integrated",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "dev": "cd backend && npm run dev",
+    "install-backend": "cd backend && npm install"
+  },
+  "keywords": ["threads", "social", "automation"],
+  "author": "Threads System",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
