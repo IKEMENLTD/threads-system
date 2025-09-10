@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="設定 - TRUE ULTIMATE THREADS SYSTEM">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>設定 - TRUE ULTIMATE THREADS SYSTEM</title>
+    
+    <link rel="stylesheet" href="css/base/reset.css">
+    <link rel="stylesheet" href="css/base/common.css">
+    <link rel="stylesheet" href="css/base/responsive.css">
+    <link rel="stylesheet" href="css/components/sidebar.css">
+    <link rel="stylesheet" href="css/components/header.css">
+    <link rel="stylesheet" href="css/components/forms.css">
+    <link rel="stylesheet" href="css/pages/settings.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">
+                    <span class="logo-main">TRUE ULTIMATE</span>
+                    <span class="logo-sub">THREADS SYSTEM</span>
+                </h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">▣</span>
+                    <span class="nav-text">ダッシュボード</span>
+                </a>
+                <a href="posts.html" class="nav-item">
+                    <span class="nav-icon">▤</span>
+                    <span class="nav-text">投稿管理</span>
+                </a>
+                <a href="schedule.html" class="nav-item">
+                    <span class="nav-icon">◷</span>
+                    <span class="nav-text">スケジュール</span>
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <span class="nav-icon">◈</span>
+                    <span class="nav-text">アナリティクス</span>
+                </a>
+                <a href="settings.html" class="nav-item active">
+                    <span class="nav-icon">◉</span>
+                    <span class="nav-text">設定</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="logout-btn">
+                    <span class="logout-icon">↗</span>
+                    <span class="logout-text">ログアウト</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="main-container">
+            <header class="main-header">
+                <button class="menu-toggle" aria-label="メニューを開く" aria-expanded="false">
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                </button>
+                
+                <div class="header-info">
+                    <span class="current-date"></span>
+                    <div class="user-info">
+                        <span class="user-name">ユーザー</span>
+                        <div class="user-avatar">U</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h2>設定</h2>
+                        <p class="page-subtitle">システム設定とカスタマイズ</p>
+                    </div>
+                </div>
+
+                <div class="settings-container">
+                    <nav class="settings-tabs">
+                        <button class="tab-btn active" data-tab="general">一般設定</button>
+                        <button class="tab-btn" data-tab="account">アカウント</button>
+                        <button class="tab-btn" data-tab="notifications">通知</button>
+                        <button class="tab-btn" data-tab="security">セキュリティ</button>
+                        <button class="tab-btn" data-tab="data">データ管理</button>
+                    </nav>
+
+                    <div class="settings-content">
+                        <div class="tab-panel active" id="general-panel">
+                            <h3 class="panel-title">一般設定</h3>
+                            
+                            <div class="setting-group">
+                                <label class="setting-label">言語設定</label>
+                                <select class="setting-select" id="languageSelect">
+                                    <option value="ja" selected>日本語</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="setting-label">タイムゾーン</label>
+                                <select class="setting-select" id="timezoneSelect">
+                                    <option value="Asia/Tokyo" selected>東京 (GMT+9)</option>
+                                    <option value="America/New_York">ニューヨーク (GMT-5)</option>
+                                    <option value="Europe/London">ロンドン (GMT+0)</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="setting-label">テーマ</label>
+                                <div class="theme-options">
+                                    <label class="radio-label">
+                                        <input type="radio" name="theme" value="light" checked>
+                                        <span class="radio-text">ライト</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="theme" value="dark">
+                                        <span class="radio-text">ダーク</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="theme" value="auto">
+                                        <span class="radio-text">自動</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="setting-label">デフォルトの投稿ステータス</label>
+                                <select class="setting-select" id="defaultStatusSelect">
+                                    <option value="draft" selected>下書き</option>
+                                    <option value="scheduled">予約投稿</option>
+                                    <option value="published">公開</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="tab-panel" id="account-panel">
+                            <h3 class="panel-title">アカウント設定</h3>
+                            
+                            <div class="setting-group">
+                                <label class="setting-label">ユーザー名</label>
+                                <input type="text" class="setting-input" id="usernameInput" value="demo" readonly>
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="setting-label">メールアドレス</label>
+                                <input type="email" class="setting-input" id="emailInput" placeholder="user@example.com">
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="setting-label">表示名</label>
+                                <input type="text" class="setting-input" id="displayNameInput" placeholder="表示名を入力">
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="setting-label">プロフィール画像</label>
+                                <div class="avatar-upload">
+                                    <div class="avatar-preview" id="avatarPreview">U</div>
+                                    <button class="btn-secondary">画像を選択</button>
+                                </div>
+                            </div>
+
+                            <div class="setting-divider"></div>
+
+                            <div class="setting-group">
+                                <h4 class="setting-subtitle">パスワード変更</h4>
+                                <input type="password" class="setting-input" placeholder="現在のパスワード">
+                                <input type="password" class="setting-input" placeholder="新しいパスワード">
+                                <input type="password" class="setting-input" placeholder="新しいパスワード（確認）">
+                                <button class="btn-primary">パスワードを更新</button>
+                            </div>
+                        </div>
+
+                        <div class="tab-panel" id="notifications-panel">
+                            <h3 class="panel-title">通知設定</h3>
+                            
+                            <div class="setting-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" class="switch-input" checked>
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-text">投稿成功時の通知</span>
+                                </label>
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" class="switch-input" checked>
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-text">投稿失敗時の通知</span>
+                                </label>
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" class="switch-input">
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-text">エンゲージメント通知</span>
+                                </label>
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" class="switch-input" checked>
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-text">スケジュールリマインダー</span>
+                                </label>
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="setting-label">通知頻度</label>
+                                <select class="setting-select">
+                                    <option value="realtime">リアルタイム</option>
+                                    <option value="hourly">1時間ごと</option>
+                                    <option value="daily" selected>1日1回</option>
+                                    <option value="weekly">週1回</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="tab-panel" id="security-panel">
+                            <h3 class="panel-title">セキュリティ設定</h3>
+                            
+                            <div class="setting-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" class="switch-input" checked>
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-text">2段階認証</span>
+                                </label>
+                            </div>
+
+                            <div class="setting-group">
+                                <label class="setting-label">セッションタイムアウト</label>
+                                <select class="setting-select">
+                                    <option value="15">15分</option>
+                                    <option value="30" selected>30分</option>
+                                    <option value="60">1時間</option>
+                                    <option value="never">無制限</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-group">
+                                <h4 class="setting-subtitle">ログイン履歴</h4>
+                                <div class="login-history">
+                                    <div class="history-item">
+                                        <span class="history-date">2025/1/8 14:30</span>
+                                        <span class="history-location">東京, 日本</span>
+                                        <span class="history-device">Chrome / Windows</span>
+                                    </div>
+                                    <div class="history-item">
+                                        <span class="history-date">2025/1/7 10:15</span>
+                                        <span class="history-location">大阪, 日本</span>
+                                        <span class="history-device">Safari / iOS</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="setting-group">
+                                <button class="btn-danger">すべてのデバイスからログアウト</button>
+                            </div>
+                        </div>
+
+                        <div class="tab-panel" id="data-panel">
+                            <h3 class="panel-title">データ管理</h3>
+                            
+                            <div class="setting-group">
+                                <h4 class="setting-subtitle">ストレージ使用状況</h4>
+                                <div class="storage-info">
+                                    <div class="storage-bar">
+                                        <div class="storage-used" style="width: 35%;"></div>
+                                    </div>
+                                    <p class="storage-text">3.5 MB / 10 MB 使用中</p>
+                                </div>
+                            </div>
+
+                            <div class="setting-group">
+                                <h4 class="setting-subtitle">データエクスポート</h4>
+                                <p class="setting-description">すべてのデータをJSON形式でダウンロード</p>
+                                <button class="btn-secondary" id="exportDataBtn">データをエクスポート</button>
+                            </div>
+
+                            <div class="setting-group">
+                                <h4 class="setting-subtitle">データインポート</h4>
+                                <p class="setting-description">JSONファイルからデータをインポート</p>
+                                <button class="btn-secondary" id="importDataBtn">データをインポート</button>
+                            </div>
+
+                            <div class="setting-divider"></div>
+
+                            <div class="setting-group danger-zone">
+                                <h4 class="setting-subtitle danger">危険ゾーン</h4>
+                                <p class="setting-description">以下の操作は取り消すことができません</p>
+                                <button class="btn-danger" id="clearCacheBtn">キャッシュをクリア</button>
+                                <button class="btn-danger" id="resetSettingsBtn">設定をリセット</button>
+                                <button class="btn-danger" id="deleteAllDataBtn">すべてのデータを削除</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-footer">
+                        <button class="btn-secondary" id="cancelSettingsBtn">キャンセル</button>
+                        <button class="btn-primary" id="saveSettingsBtn">設定を保存</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div class="mobile-overlay"></div>
+    </div>
+
+    <script src="js/core/config.js"></script>
+    <script src="js/core/constants.js"></script>
+    <script src="js/utils/common.js"></script>
+    <script src="js/data/storage-manager.js"></script>
+    <script src="js/data/session-manager.js"></script>
+    <script src="js/data/settings-data.js"></script>
+    <script src="js/ui/page-base.js"></script>
+    <script src="js/pages/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="スケジュール管理 - TRUE ULTIMATE THREADS SYSTEM">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>スケジュール - TRUE ULTIMATE THREADS SYSTEM</title>
+    
+    <link rel="stylesheet" href="css/base/reset.css">
+    <link rel="stylesheet" href="css/base/common.css">
+    <link rel="stylesheet" href="css/base/responsive.css">
+    <link rel="stylesheet" href="css/components/sidebar.css">
+    <link rel="stylesheet" href="css/components/header.css">
+    <link rel="stylesheet" href="css/components/calendar.css">
+    <link rel="stylesheet" href="css/pages/schedule.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">
+                    <span class="logo-main">TRUE ULTIMATE</span>
+                    <span class="logo-sub">THREADS SYSTEM</span>
+                </h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">▣</span>
+                    <span class="nav-text">ダッシュボード</span>
+                </a>
+                <a href="posts.html" class="nav-item">
+                    <span class="nav-icon">▤</span>
+                    <span class="nav-text">投稿管理</span>
+                </a>
+                <a href="schedule.html" class="nav-item active">
+                    <span class="nav-icon">◷</span>
+                    <span class="nav-text">スケジュール</span>
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <span class="nav-icon">◈</span>
+                    <span class="nav-text">アナリティクス</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span class="nav-icon">◉</span>
+                    <span class="nav-text">設定</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="logout-btn">
+                    <span class="logout-icon">↗</span>
+                    <span class="logout-text">ログアウト</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="main-container">
+            <header class="main-header">
+                <button class="menu-toggle" aria-label="メニューを開く" aria-expanded="false">
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                </button>
+                
+                <div class="header-info">
+                    <span class="current-date"></span>
+                    <div class="user-info">
+                        <span class="user-name">ユーザー</span>
+                        <div class="user-avatar">U</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h2>スケジュール管理</h2>
+                        <p class="page-subtitle">投稿の予約とカレンダー表示</p>
+                    </div>
+                    <div class="view-switcher">
+                        <button class="view-btn active" data-view="month">月</button>
+                        <button class="view-btn" data-view="week">週</button>
+                        <button class="view-btn" data-view="list">リスト</button>
+                    </div>
+                </div>
+
+                <div class="schedule-container">
+                    <section class="calendar-section">
+                        <div class="calendar-header">
+                            <button class="calendar-nav" id="prevMonth">◀</button>
+                            <h3 class="calendar-title" id="calendarTitle">2025年1月</h3>
+                            <button class="calendar-nav" id="nextMonth">▶</button>
+                        </div>
+                        
+                        <div class="calendar-grid" id="calendarGrid">
+                            <div class="calendar-weekdays">
+                                <div class="weekday">日</div>
+                                <div class="weekday">月</div>
+                                <div class="weekday">火</div>
+                                <div class="weekday">水</div>
+                                <div class="weekday">木</div>
+                                <div class="weekday">金</div>
+                                <div class="weekday">土</div>
+                            </div>
+                            <div class="calendar-days" id="calendarDays">
+                            </div>
+                        </div>
+                    </section>
+
+                    <aside class="schedule-sidebar">
+                        <div class="schedule-summary">
+                            <h3 class="summary-title">今月の予定</h3>
+                            <div class="summary-stats">
+                                <div class="summary-item">
+                                    <span class="summary-label">予約投稿</span>
+                                    <span class="summary-value" id="scheduledCount">12</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">下書き</span>
+                                    <span class="summary-value" id="draftCount">5</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">公開済み</span>
+                                    <span class="summary-value" id="publishedCount">28</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="upcoming-posts">
+                            <h3 class="upcoming-title">直近の予定</h3>
+                            <div class="upcoming-list" id="upcomingList">
+                                <div class="upcoming-item">
+                                    <div class="upcoming-time">今日 15:00</div>
+                                    <div class="upcoming-content">
+                                        <h4 class="upcoming-post-title">新商品のお知らせ</h4>
+                                        <span class="upcoming-status scheduled">予約済み</span>
+                                    </div>
+                                </div>
+                                <div class="upcoming-item">
+                                    <div class="upcoming-time">明日 10:00</div>
+                                    <div class="upcoming-content">
+                                        <h4 class="upcoming-post-title">週末セール情報</h4>
+                                        <span class="upcoming-status draft">下書き</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quick-actions">
+                            <button class="btn-primary full-width" id="quickScheduleBtn">
+                                <span class="btn-icon">+</span>
+                                予約投稿を追加
+                            </button>
+                        </div>
+                    </aside>
+                </div>
+
+                <section class="schedule-list-view" id="listView" style="display: none;">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>日時</th>
+                                <th>タイトル</th>
+                                <th>ステータス</th>
+                                <th>アクション</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody">
+                        </tbody>
+                    </table>
+                </section>
+            </main>
+        </div>
+
+        <div class="mobile-overlay"></div>
+    </div>
+
+    <script src="js/core/config.js"></script>
+    <script src="js/core/constants.js"></script>
+    <script src="js/utils/common.js"></script>
+    <script src="js/utils/date-utils.js"></script>
+    <script src="js/data/storage-manager.js"></script>
+    <script src="js/data/session-manager.js"></script>
+    <script src="js/data/schedule-data.js"></script>
+    <script src="js/ui/page-base.js"></script>
+    <script src="js/ui/calendar-controller.js"></script>
+    <script src="js/pages/schedule.js"></script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+.settings-container {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.settings-tabs {
+    display: flex;
+    background: var(--color-gray-50);
+    border-bottom: 2px solid var(--color-gray-200);
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-600);
+    white-space: nowrap;
+    transition: var(--transition-base);
+    position: relative;
+}
+
+.tab-btn.active {
+    color: var(--color-primary);
+    background: var(--color-white);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-primary);
+}
+
+.tab-btn:hover:not(.active) {
+    color: var(--color-gray-900);
+    background: var(--color-gray-100);
+}
+
+.settings-content {
+    padding: var(--spacing-2xl);
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.panel-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-900);
+    margin-bottom: var(--spacing-xl);
+}
+
+.setting-group {
+    margin-bottom: var(--spacing-xl);
+}
+
+.setting-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-700);
+    margin-bottom: var(--spacing-sm);
+}
+
+.setting-subtitle {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-800);
+    margin-bottom: var(--spacing-md);
+}
+
+.setting-subtitle.danger {
+    color: var(--color-error);
+}
+
+.setting-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+    margin-bottom: var(--spacing-md);
+}
+
+.setting-divider {
+    height: 1px;
+    background: var(--color-gray-200);
+    margin: var(--spacing-xl) 0;
+}
+
+.theme-options {
+    display: flex;
+    gap: var(--spacing-lg);
+}
+
+.avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.avatar-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+}
+
+.login-history {
+    background: var(--color-gray-50);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-gray-200);
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-date,
+.history-location,
+.history-device {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+.storage-info {
+    margin-bottom: var(--spacing-md);
+}
+
+.storage-bar {
+    height: 8px;
+    background: var(--color-gray-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+
+.storage-used {
+    height: 100%;
+    background: var(--color-primary);
+    transition: var(--transition-base);
+}
+
+.storage-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+.danger-zone {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+}
+
+.danger-zone button {
+    margin-right: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.settings-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xl);
+    background: var(--color-gray-50);
+    border-top: 1px solid var(--color-gray-200);
+}
+
+.full-width {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .settings-tabs {
+        flex-direction: column;
+    }
+    
+    .tab-btn {
+        text-align: left;
+    }
+    
+    .theme-options {
+        flex-direction: column;
+    }
+    
+    .history-item {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .settings-footer {
+        flex-direction: column;
+    }
+    
+    .settings-footer button {
+        width: 100%;
+    }
+}

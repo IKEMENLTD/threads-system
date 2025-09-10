@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TRUE ULTIMATE THREADS SYSTEM - ログイン">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>ログイン - TRUE ULTIMATE THREADS SYSTEM</title>
+    
+    <link rel="stylesheet" href="css/base/reset.css">
+    <link rel="stylesheet" href="css/base/common.css">
+    <link rel="stylesheet" href="css/pages/login.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="login-container">
+        <div class="background-decoration" aria-hidden="true">
+            <div class="decoration-circle decoration-1"></div>
+            <div class="decoration-circle decoration-2"></div>
+            <div class="decoration-circle decoration-3"></div>
+        </div>
+
+        <div class="login-wrapper">
+            <div class="login-card">
+                <header class="login-header">
+                    <div class="logo-wrapper">
+                        <h1 class="system-title">
+                            <span class="title-main">TRUE ULTIMATE</span>
+                            <span class="title-sub">THREADS SYSTEM</span>
+                        </h1>
+                    </div>
+                    <p class="system-description">セキュアシステムアクセス</p>
+                </header>
+
+                <form id="loginForm" class="login-form" novalidate>
+                    <div class="form-group">
+                        <label for="username" class="form-label">
+                            <span class="label-text">ユーザー名</span>
+                            <span class="required-indicator" aria-label="必須">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">U</span>
+                            <input type="text" 
+                                   id="username" 
+                                   name="username" 
+                                   class="form-input"
+                                   placeholder="ユーザー名を入力"
+                                   required
+                                   autocomplete="username"
+                                   aria-required="true"
+                                   aria-describedby="username-error"
+                                   minlength="3"
+                                   pattern="^[a-zA-Z0-9_]+$">
+                        </div>
+                        <span class="error-message" id="username-error" role="alert" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <span class="label-text">パスワード</span>
+                            <span class="required-indicator" aria-label="必須">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">P</span>
+                            <input type="password" 
+                                   id="password" 
+                                   name="password"
+                                   class="form-input"
+                                   placeholder="パスワードを入力"
+                                   required
+                                   autocomplete="current-password"
+                                   aria-required="true"
+                                   aria-describedby="password-error"
+                                   minlength="6">
+                            <button type="button" 
+                                    class="password-toggle" 
+                                    id="passwordToggle"
+                                    aria-label="パスワードを表示">
+                                <span class="toggle-icon">●</span>
+                            </button>
+                        </div>
+                        <span class="error-message" id="password-error" role="alert" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label for="remember" class="checkbox-label">
+                            <input type="checkbox" id="remember" name="remember" class="checkbox-input">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">ログイン状態を保持する</span>
+                        </label>
+                    </div>
+
+                    <div class="form-message" id="formMessage" role="alert" aria-live="assertive"></div>
+
+                    <button type="submit" class="submit-button" id="submitButton">
+                        <span class="button-icon">→</span>
+                        <span class="button-text">ログイン</span>
+                        <span class="button-loader" aria-hidden="true"></span>
+                    </button>
+                </form>
+
+                <footer class="login-footer" id="loginFooter">
+                    <div class="divider"></div>
+                    <div class="default-credentials">
+                        <p class="credentials-title">デモ用アカウント</p>
+                        <div class="credentials-info">
+                            <div class="credential-item">
+                                <span class="credential-label">ユーザー名:</span>
+                                <code class="credential-value">demo</code>
+                            </div>
+                            <div class="credential-item">
+                                <span class="credential-label">パスワード:</span>
+                                <code class="credential-value">demo123</code>
+                            </div>
+                        </div>
+                        <button type="button" class="demo-fill-button" id="demoFillButton">
+                            デモアカウントで自動入力
+                        </button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <noscript>
+        <div class="noscript-warning">
+            <h2>JavaScriptを有効にしてください</h2>
+            <p>このシステムを使用するにはJavaScriptが必要です。</p>
+        </div>
+    </noscript>
+
+    <script src="js/core/config.js"></script>
+    <script src="js/core/constants.js"></script>
+    <script src="js/utils/common.js"></script>
+    <script src="js/utils/security-utils.js"></script>
+    <script src="js/utils/input-validator.js"></script>
+    <script src="js/data/storage-manager.js"></script>
+    <script src="js/data/session-manager.js"></script>
+    <script src="js/pages/login.js"></script>
+</body>
+</html>
