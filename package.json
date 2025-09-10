@@ -4,9 +4,8 @@
   "description": "Threads System Backend",
   "main": "server.js",
   "scripts": {
-    "start": "npm run build && node server.js",
-    "dev": "nodemon server.js",
-    "build": "mkdir -p public && cp -r ../*.html ../css ../js ../assets public/ 2>/dev/null || true"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": ["threads", "social", "automation"],
   "author": "Threads System",
