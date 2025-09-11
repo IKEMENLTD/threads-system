@@ -1,42 +1,99 @@
+console.log('=== SERVER STARTUP BEGIN ===');
+console.log('Node version:', process.version);
+console.log('Current directory:', process.cwd());
+console.log('__dirname:', __dirname);
+console.log('Environment:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+
+// モジュール読み込み開始
+console.log('[1/7] Loading express...');
 const express = require('express');
+console.log('[2/7] Loading cors...');
 const cors = require('cors');
+console.log('[3/7] Loading path...');
 const path = require('path');
+console.log('[4/7] Loading fs...');
+const fs = require('fs');
+console.log('[5/7] Loading dotenv...');
 require('dotenv').config();
-
+console.log('[6/7] Creating Express app...');
 const app = express();
+console.log('[7/7] Express app created successfully');
 
-// ミドルウェア
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ミドルウェア設定
+console.log('Setting up middleware...');
+try {
+  app.use(cors());
+  console.log('✓ CORS middleware added');
+  app.use(express.json());
+  console.log('✓ JSON parser added');
+  app.use(express.urlencoded({ extended: true }));
+  console.log('✓ URL encoder added');
+  
+  // フロントエンドの静的ファイルを配信
+  app.use(express.static(__dirname));
+  console.log('✓ Static files middleware added for:', __dirname);
+} catch (error) {
+  console.error('ERROR in middleware setup:', error);
+  process.exit(1);
+}
 
-// フロントエンドの静的ファイルを配信
-app.use(express.static(__dirname));
-
-// Supabase接続確認（遅延読み込み）
-const { testConnection } = require('./supabase-setup');
-
-// 起動時に接続テスト
-(async () => {
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
-    const connected = await testConnection();
-    if (connected) {
-      console.log('📊 Database: Supabase PostgreSQL');
+// データベース接続はサーバー起動後に非同期で行う
+function checkDatabaseConnection() {
+  // Renderではrequireを使わずに遅延読み込み
+  setTimeout(() => {
+    try {
+      if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
+        const { testConnection } = require('./supabase-setup');
+        testConnection().then(connected => {
+          if (connected) {
+            console.log('📊 Database: Supabase PostgreSQL connected');
+          } else {
+            console.log('⚠️  Database connection failed but server is running');
+          }
+        }).catch(error => {
+          console.error('Database test error:', error.message);
+        });
+      } else {
+        console.log('⚠️  Supabase環境変数が設定されていません');
+      }
+    } catch (error) {
+      console.error('Database setup error:', error.message);
     }
-  } else {
-    console.log('⚠️  Supabase環境変数が設定されていません');
-    console.log('必要な環境変数: SUPABASE_URL, SUPABASE_ANON_KEY');
-  }
-})();
+  }, 1000); // サーバー起動後1秒後に実行
+}
 
 // ルート設定
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
+console.log('Loading route modules...');
+try {
+  console.log('Loading auth routes from:', path.join(__dirname, 'routes/auth.js'));
+  const authRoutes = require('./routes/auth');
+  console.log('✓ Auth routes loaded');
+  
+  console.log('Loading posts routes from:', path.join(__dirname, 'routes/posts.js'));
+  const postsRoutes = require('./routes/posts');
+  console.log('✓ Posts routes loaded');
+  
+  app.use('/api/auth', authRoutes);
+  console.log('✓ Auth routes mounted at /api/auth');
+  app.use('/api/posts', postsRoutes);
+  console.log('✓ Posts routes mounted at /api/posts');
+} catch (error) {
+  console.error('ERROR loading routes:', error);
+  console.error('Stack trace:', error.stack);
+  // Continue without routes for now
+}
 
 // ヘルスチェック
 app.get('/api/health', async (req, res) => {
-  const { testConnection } = require('./supabase-setup');
-  const dbConnected = await testConnection();
+  let dbConnected = false;
+  
+  try {
+    const { testConnection } = require('./supabase-setup');
+    dbConnected = await testConnection();
+  } catch (error) {
+    console.error('Health check DB error:', error.message);
+  }
   
   res.json({ 
     status: 'ok',
@@ -73,7 +130,15 @@ app.get('/api', (req, res) => {
         register: 'POST /api/auth/register',
         verify: 'GET /api/auth/verify'
       },
-      posts: '/api/posts (coming soon)'
+      posts: {
+        list: 'GET /api/posts',
+        create: 'POST /api/posts',
+        get: 'GET /api/posts/:id',
+        update: 'PUT /api/posts/:id',
+        delete: 'DELETE /api/posts/:id',
+        duplicate: 'POST /api/posts/:id/duplicate',
+        updateStatus: 'PUT /api/posts/:id/status'
+      }
     }
   });
 });
@@ -102,20 +167,70 @@ app.use((req, res) => {
   const requestedFile = req.path.slice(1); // Remove leading slash
   
   if (htmlFiles.includes(requestedFile)) {
-    return res.sendFile(path.join(__dirname, requestedFile));
+    const filePath = path.join(__dirname, requestedFile);
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath);
+    }
   }
   
   // その他はindex.htmlにフォールバック（SPAルーティング）
-  res.sendFile(path.join(__dirname, 'index.html'));
+  const indexPath = path.join(__dirname, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send('Application files not found');
+  }
 });
 
 const PORT = process.env.PORT || 3000;
-const HOST = '0.0.0.0'; // Railwayで必要
-app.listen(PORT, HOST, () => {
+const HOST = '0.0.0.0';
+
+// プロセス終了ハンドリング
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('UNCAUGHT EXCEPTION:', error);
+  console.error('Stack:', error.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+console.log('=== SERVER INITIALIZATION COMPLETE ===');
+
+// サーバー起動
+console.log(`Attempting to start server on ${HOST}:${PORT}...`);
+const server = app.listen(PORT, HOST, (error) => {
+  if (error) {
+    console.error('ERROR: Failed to start server:', error);
+    process.exit(1);
+  }
   console.log('=====================================');
   console.log('🚀 Threads System Backend Started!');
   console.log('=====================================');
-  console.log(`📡 Server: http://localhost:${PORT}`);
-  console.log(`🔧 Test API: http://localhost:${PORT}/api/test`);
+  console.log(`📡 Server: http://${HOST}:${PORT}`);
+  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔧 Test API: http://${HOST}:${PORT}/api/test`);
   console.log('=====================================');
+  console.log('Server is now accepting connections');
+  
+  // サーバー起動後にデータベース接続チェック
+  checkDatabaseConnection();
+});
+
+server.on('error', (error) => {
+  console.error('Server error event:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+  }
+  process.exit(1);
 });

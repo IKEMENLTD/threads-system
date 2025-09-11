@@ -1,10 +1,26 @@
+console.log('[AUTH] Loading auth routes module...');
 const express = require('express');
+console.log('[AUTH] Express loaded');
 const jwt = require('jsonwebtoken');
+console.log('[AUTH] JWT loaded');
 const bcrypt = require('bcryptjs');
+console.log('[AUTH] Bcrypt loaded');
 const router = express.Router();
+console.log('[AUTH] Router created');
 
 // Supabase関数をインポート
-const { createUser, getUserByEmail } = require('../supabase-setup');
+let createUser, getUserByEmail;
+try {
+    console.log('[AUTH] Attempting to load supabase-setup...');
+    const supabaseSetup = require('../supabase-setup');
+    createUser = supabaseSetup.createUser;
+    getUserByEmail = supabaseSetup.getUserByEmail;
+} catch (error) {
+    console.error('Supabase setup error:', error.message);
+    // ダミー関数を提供
+    createUser = async () => ({ error: 'Database not available' });
+    getUserByEmail = async () => ({ error: 'Database not available' });
+}
 
 // JWT秘密鍵
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
