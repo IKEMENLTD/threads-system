@@ -7,7 +7,9 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node server-fast.js
+    healthCheckPath: /health
+    numInstances: 1
     envVars:
       - key: NODE_ENV
         value: production

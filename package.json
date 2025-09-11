@@ -2,9 +2,9 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "Threads System Backend",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node server-safe.js",
+    "start": "node server-fast.js",
     "start:main": "node server.js",
     "start:debug": "node debug-start.js",
     "start:health": "node health-check.js",
@@ -12,6 +12,8 @@
     "start:safe": "node server-safe.js",
     "start:test": "node render-test.js",
     "start:immediate": "node server-immediate.js",
+    "start:fast": "node server-fast.js",
+    "start:index": "node index.js",
     "dev": "nodemon server.js"
   },
   "keywords": ["threads", "social", "automation"],
