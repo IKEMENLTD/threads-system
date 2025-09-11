@@ -81,27 +81,30 @@
                 return;
             }
             
-            const username = this.usernameInput.value.trim();
+            const email = this.usernameInput.value.trim();
             const password = this.passwordInput.value;
             
-            if (this.checkRateLimit(username)) {
+            if (this.checkRateLimit(email)) {
                 this.showError(AppConstants.MESSAGES.ERRORS.RATE_LIMIT);
                 return;
             }
             
             this.setLoadingState(true);
             
-            setTimeout(() => {
-                const result = this.authenticate(username, password);
+            try {
+                const result = await this.authenticate(email, password);
                 
                 if (result.success) {
                     this.handleSuccessfulLogin(result.user);
                 } else {
-                    this.handleFailedLogin(username, result.message);
+                    this.handleFailedLogin(email, result.error);
                 }
-                
-                this.setLoadingState(false);
-            }, 1000);
+            } catch (error) {
+                this.handleFailedLogin(email, 'サーバーエラーが発生しました');
+                console.error('Login error:', error);
+            }
+            
+            this.setLoadingState(false);
         },
         
         validateForm: function() {
@@ -131,28 +134,46 @@
             return isValid;
         },
         
-        authenticate: function(username, password) {
-            const account = AppConstants.DEMO_ACCOUNTS.find(
-                acc => acc.username === username && acc.password === password
-            );
-            
-            if (account) {
+        authenticate: async function(email, password) {
+            try {
+                const response = await fetch(AppConfig.api.baseUrl + '/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.token) {
+                    // JWTトークンを保存
+                    localStorage.setItem('threads_system_session', data.token);
+                    
+                    return {
+                        success: true,
+                        user: {
+                            id: data.user.id,
+                            username: data.user.username,
+                            email: data.user.email,
+                            role: data.user.role,
+                            createdAt: data.user.createdAt
+                        }
+                    };
+                }
+                
                 return {
-                    success: true,
-                    user: {
-                        id: this.generateUserId(),
-                        username: account.username,
-                        role: account.role,
-                        email: `${account.username}@example.com`,
-                        createdAt: Date.now()
-                    }
+                    success: false,
+                    error: data.error || 'ログインに失敗しました'
+                };
+                
+            } catch (error) {
+                console.error('Authentication error:', error);
+                return {
+                    success: false,
+                    error: 'サーバーとの通信に失敗しました'
                 };
             }
-            
-            return {
-                success: false,
-                message: AppConstants.MESSAGES.ERRORS.LOGIN_FAILED
-            };
         },
         
         handleSuccessfulLogin: function(user) {

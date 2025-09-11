@@ -84,14 +84,20 @@
         
         openSidebar: function() {
             this.sidebar.classList.add('open');
-            this.mobileOverlay.classList.add('active');
-            this.menuToggle.classList.add('active');
-            this.menuToggle.setAttribute('aria-expanded', 'true');
+            if (this.mobileOverlay) {
+                this.mobileOverlay.classList.add('active');
+            }
+            if (this.menuToggle) {
+                this.menuToggle.classList.add('active');
+                this.menuToggle.setAttribute('aria-expanded', 'true');
+            }
         },
         
         closeSidebar: function() {
             this.sidebar.classList.remove('open');
-            this.mobileOverlay.classList.remove('active');
+            if (this.mobileOverlay) {
+                this.mobileOverlay.classList.remove('active');
+            }
             if (this.menuToggle) {
                 this.menuToggle.classList.remove('active');
                 this.menuToggle.setAttribute('aria-expanded', 'false');

@@ -9,6 +9,7 @@
             
             this.bindElements();
             this.setupEventListeners();
+            this.setupRealtimeValidation();
             this.loadPosts();
         },
         
@@ -55,9 +56,49 @@
         },
         
         
-        loadPosts: function() {
-            const posts = PostsData.getAllPosts();
-            this.renderPosts(posts);
+        loadPosts: async function() {
+            try {
+                this.setLoadingState(true);
+                const posts = await this.fetchPostsFromAPI();
+                this.renderPosts(posts);
+            } catch (error) {
+                console.error('投稿読み込みエラー:', error);
+                CommonUtils.showNotification('投稿の読み込みに失敗しました', 'error');
+                this.renderPosts([]);
+            } finally {
+                this.setLoadingState(false);
+            }
+        },
+
+        fetchPostsFromAPI: async function() {
+            const token = localStorage.getItem('threads_system_session');
+            if (!token) {
+                throw new Error('認証トークンが見つかりません');
+            }
+
+            const response = await fetch(`${AppConfig.api.baseUrl}/api/posts`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    SessionManager.destroySession();
+                    window.location.href = AppConstants.ROUTES.LOGIN;
+                    return;
+                }
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || '投稿の取得に失敗しました');
+            }
+
+            return data.posts || [];
         },
         
         renderPosts: function(posts) {
@@ -122,29 +163,66 @@
             });
         },
         
-        filterPosts: function() {
-            const status = this.statusFilter?.value || 'all';
-            const dateRange = this.dateFilter?.value || 'all';
-            const searchQuery = this.searchPosts?.value.toLowerCase() || '';
-            
-            let posts = PostsData.getAllPosts();
-            
-            if (status !== 'all') {
-                posts = posts.filter(post => post.status === status);
+        filterPosts: async function() {
+            try {
+                const status = this.statusFilter?.value || 'all';
+                const dateRange = this.dateFilter?.value || 'all';
+                const searchQuery = this.searchPosts?.value.toLowerCase() || '';
+                
+                let posts = await this.fetchPostsFromAPI();
+                
+                if (status !== 'all') {
+                    posts = posts.filter(post => post.status === status);
+                }
+                
+                if (searchQuery) {
+                    posts = posts.filter(post => 
+                        post.title.toLowerCase().includes(searchQuery) ||
+                        post.content.toLowerCase().includes(searchQuery)
+                    );
+                }
+                
+                // 日付フィルタリング実装
+                if (dateRange !== 'all') {
+                    posts = this.filterByDateRange(posts, dateRange);
+                }
+                
+                this.renderPosts(posts);
+            } catch (error) {
+                console.error('フィルタリングエラー:', error);
+                CommonUtils.showNotification('フィルタリングに失敗しました', 'error');
             }
+        },
+
+        filterByDateRange: function(posts, range) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             
-            if (searchQuery) {
-                posts = posts.filter(post => 
-                    post.title.toLowerCase().includes(searchQuery) ||
-                    post.content.toLowerCase().includes(searchQuery)
-                );
-            }
-            
-            this.renderPosts(posts);
+            return posts.filter(post => {
+                const postDate = new Date(post.createdAt);
+                const postDateOnly = new Date(postDate.getFullYear(), postDate.getMonth(), postDate.getDate());
+                
+                switch(range) {
+                    case 'today':
+                        return postDateOnly.getTime() === today.getTime();
+                    case 'week':
+                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        return postDateOnly >= weekAgo;
+                    case 'month':
+                        const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+                        return postDateOnly >= monthAgo;
+                    default:
+                        return true;
+                }
+            });
         },
         
         openNewPostModal: function() {
             this.postForm?.reset();
+            this.currentEditingPostId = null;
+            document.getElementById('modalTitle').textContent = '新規投稿';
+            document.getElementById('postSchedule').value = '';
+            this.clearAllFormErrors();
             this.updateCharCount();
             ModalController.open('postModal');
         },
@@ -160,55 +238,256 @@
             }
         },
         
-        savePost: function() {
-            const formData = new FormData(this.postForm);
-            
-            const postData = {
-                title: formData.get('postTitle'),
-                content: formData.get('postContent'),
-                hashtags: formData.get('postHashtags')?.split(' ').filter(tag => tag.startsWith('#')),
-                status: formData.get('postStatus'),
-                scheduledAt: formData.get('postSchedule') ? new Date(formData.get('postSchedule')).getTime() : null
-            };
-            
-            PostsData.createPost(postData);
-            CommonUtils.showNotification('投稿を保存しました', 'success');
-            this.closePostModal();
-            this.loadPosts();
+        savePost: async function() {
+            try {
+                const formData = new FormData(this.postForm);
+                
+                const postData = {
+                    title: formData.get('postTitle'),
+                    content: formData.get('postContent'),
+                    hashtags: formData.get('postHashtags')?.split(' ').filter(tag => tag.trim().startsWith('#')),
+                    status: formData.get('postStatus'),
+                    scheduledAt: formData.get('postSchedule') || null
+                };
+
+                // バリデーション
+                this.clearAllFormErrors();
+                let hasErrors = false;
+
+                const validation = InputValidator.validatePostTitle(postData.title);
+                if (!validation.isValid) {
+                    this.showFieldError('postTitle', validation.errors[0]);
+                    hasErrors = true;
+                }
+
+                const contentValidation = InputValidator.validatePostContent(postData.content);
+                if (!contentValidation.isValid) {
+                    this.showFieldError('postContent', contentValidation.errors[0]);
+                    hasErrors = true;
+                }
+
+                if (hasErrors) {
+                    this.showFormMessage('入力内容に誤りがあります', 'error');
+                    return;
+                }
+
+                this.setButtonLoading('savePost', true);
+
+                const token = localStorage.getItem('threads_system_session');
+                const isEditing = this.currentEditingPostId;
+                const url = isEditing 
+                    ? `${AppConfig.api.baseUrl}/api/posts/${this.currentEditingPostId}`
+                    : `${AppConfig.api.baseUrl}/api/posts`;
+                const method = isEditing ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || '投稿の保存に失敗しました');
+                }
+
+                CommonUtils.showNotification(isEditing ? '投稿を更新しました' : '投稿を作成しました', 'success');
+                this.closePostModal();
+                await this.loadPosts();
+
+            } catch (error) {
+                console.error('投稿保存エラー:', error);
+                CommonUtils.showNotification(error.message || '投稿の保存に失敗しました', 'error');
+            } finally {
+                this.setButtonLoading('savePost', false);
+            }
         },
         
-        editPost: function(postId) {
-            const post = PostsData.getPostById(postId);
-            if (post) {
+        editPost: async function(postId) {
+            try {
+                const token = localStorage.getItem('threads_system_session');
+                const response = await fetch(`${AppConfig.api.baseUrl}/api/posts/${postId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || '投稿の取得に失敗しました');
+                }
+
+                const post = data.post;
                 document.getElementById('postTitle').value = post.title;
                 document.getElementById('postContent').value = post.content;
                 document.getElementById('postHashtags').value = post.hashtags?.join(' ') || '';
                 document.getElementById('postStatus').value = post.status;
+                if (post.scheduledAt) {
+                    const scheduleDate = new Date(post.scheduledAt);
+                    const localDateTime = new Date(scheduleDate.getTime() - scheduleDate.getTimezoneOffset() * 60000)
+                        .toISOString().slice(0, 16);
+                    document.getElementById('postSchedule').value = localDateTime;
+                } else {
+                    document.getElementById('postSchedule').value = '';
+                }
+                this.currentEditingPostId = postId;
+                document.getElementById('modalTitle').textContent = '投稿を編集';
                 this.updateCharCount();
                 ModalController.open('postModal');
+
+            } catch (error) {
+                console.error('投稿編集エラー:', error);
+                CommonUtils.showNotification(error.message || '投稿の取得に失敗しました', 'error');
             }
         },
         
-        deletePost: function(postId) {
-            if (confirm('この投稿を削除しますか？')) {
-                PostsData.deletePost(postId);
+        deletePost: async function(postId) {
+            if (!confirm('この投稿を削除しますか？')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('threads_system_session');
+                const response = await fetch(`${AppConfig.api.baseUrl}/api/posts/${postId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || '投稿の削除に失敗しました');
+                }
+
                 CommonUtils.showNotification('投稿を削除しました', 'success');
-                this.loadPosts();
+                await this.loadPosts();
+
+            } catch (error) {
+                console.error('投稿削除エラー:', error);
+                CommonUtils.showNotification(error.message || '投稿の削除に失敗しました', 'error');
             }
         },
         
-        duplicatePost: function(postId) {
-            const post = PostsData.getPostById(postId);
-            if (post) {
-                const duplicatedPost = {
-                    ...post,
-                    title: post.title + ' (コピー)',
-                    status: 'draft'
-                };
-                delete duplicatedPost.id;
-                PostsData.createPost(duplicatedPost);
+        duplicatePost: async function(postId) {
+            try {
+                const token = localStorage.getItem('threads_system_session');
+                const response = await fetch(`${AppConfig.api.baseUrl}/api/posts/${postId}/duplicate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || '投稿の複製に失敗しました');
+                }
+
                 CommonUtils.showNotification('投稿を複製しました', 'success');
-                this.loadPosts();
+                await this.loadPosts();
+
+            } catch (error) {
+                console.error('投稿複製エラー:', error);
+                CommonUtils.showNotification(error.message || '投稿の複製に失敗しました', 'error');
+            }
+        },
+
+        setLoadingState: function(isLoading) {
+            if (this.postsGrid) {
+                if (isLoading) {
+                    this.postsGrid.innerHTML = '<div class="no-posts">読み込み中...</div>';
+                }
+            }
+        },
+
+        setButtonLoading: function(buttonId, isLoading) {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                if (isLoading) {
+                    button.disabled = true;
+                    button.classList.add('loading');
+                } else {
+                    button.disabled = false;
+                    button.classList.remove('loading');
+                }
+            }
+        },
+
+        showFormMessage: function(message, type = 'error') {
+            const formMessage = document.getElementById('formMessage');
+            if (formMessage) {
+                formMessage.textContent = message;
+                formMessage.className = `form-message ${type}`;
+            }
+        },
+
+        hideFormMessage: function() {
+            const formMessage = document.getElementById('formMessage');
+            if (formMessage) {
+                formMessage.textContent = '';
+                formMessage.className = 'form-message';
+            }
+        },
+
+        showFieldError: function(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            const inputElement = document.getElementById(fieldId);
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+            }
+            
+            if (inputElement) {
+                inputElement.classList.add('error');
+            }
+        },
+
+        clearFieldError: function(fieldId) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            const inputElement = document.getElementById(fieldId);
+            
+            if (errorElement) {
+                errorElement.textContent = '';
+            }
+            
+            if (inputElement) {
+                inputElement.classList.remove('error');
+            }
+        },
+
+        clearAllFormErrors: function() {
+            this.hideFormMessage();
+            this.clearFieldError('postTitle');
+            this.clearFieldError('postContent');
+        },
+
+        setupRealtimeValidation: function() {
+            const titleInput = document.getElementById('postTitle');
+            const contentInput = document.getElementById('postContent');
+
+            if (titleInput) {
+                titleInput.addEventListener('input', () => {
+                    if (titleInput.classList.contains('error')) {
+                        this.clearFieldError('postTitle');
+                    }
+                });
+            }
+
+            if (contentInput) {
+                contentInput.addEventListener('input', () => {
+                    if (contentInput.classList.contains('error')) {
+                        this.clearFieldError('postContent');
+                    }
+                    this.updateCharCount();
+                });
             }
         }
     };
