@@ -1,3 +1,16 @@
+// Renderのために即座に何か出力
+process.stdout.write('Starting server...\n');
+
+// プロセスが早期終了しないように
+process.on('exit', (code) => {
+  console.log('Process exit event with code:', code);
+});
+
+// 標準出力をフラッシュ
+if (process.stdout.isTTY) {
+  process.stdout.write('\033[2J\033[0f');
+}
+
 console.log('=== SERVER STARTUP BEGIN ===');
 console.log('Node version:', process.version);
 console.log('Current directory:', process.cwd());
@@ -182,8 +195,16 @@ app.use((req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '10000', 10);
 const HOST = '0.0.0.0';
+
+// ポート番号の検証
+if (isNaN(PORT) || PORT < 0 || PORT > 65535) {
+  console.error('Invalid PORT:', process.env.PORT);
+  process.exit(1);
+}
+
+console.log('Port configuration:', { PORT, HOST });
 
 // プロセス終了ハンドリング
 process.on('SIGTERM', () => {
@@ -207,9 +228,29 @@ process.on('unhandledRejection', (reason, promise) => {
 
 console.log('=== SERVER INITIALIZATION COMPLETE ===');
 
+// Renderのために定期的にヘルスチェック
+if (process.env.NODE_ENV === 'production') {
+  setInterval(() => {
+    const memUsage = process.memoryUsage();
+    console.log('Health:', {
+      uptime: Math.floor(process.uptime()),
+      memory: Math.floor(memUsage.heapUsed / 1024 / 1024) + 'MB',
+      port: PORT
+    });
+  }, 60000); // 1分ごと
+}
+
 // サーバー起動
 console.log(`Attempting to start server on ${HOST}:${PORT}...`);
+
+// タイムアウトを設定してサーバー起動
+const startTimeout = setTimeout(() => {
+  console.error('Server start timeout after 10 seconds');
+  process.exit(1);
+}, 10000);
+
 const server = app.listen(PORT, HOST, (error) => {
+  clearTimeout(startTimeout);
   if (error) {
     console.error('ERROR: Failed to start server:', error);
     process.exit(1);

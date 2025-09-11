@@ -4,10 +4,14 @@
   "description": "Threads System Backend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server-safe.js",
+    "start:main": "node server.js",
     "start:debug": "node debug-start.js",
     "start:health": "node health-check.js",
     "start:minimal": "node server-minimal.js",
+    "start:safe": "node server-safe.js",
+    "start:test": "node render-test.js",
+    "start:immediate": "node server-immediate.js",
     "dev": "nodemon server.js"
   },
   "keywords": ["threads", "social", "automation"],
