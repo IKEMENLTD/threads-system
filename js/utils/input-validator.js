@@ -288,6 +288,46 @@
             }
             
             return result;
+        },
+        
+        validatePostTitle: function(title) {
+            const result = {
+                isValid: true,
+                errors: []
+            };
+            
+            if (!title || title.trim() === '') {
+                result.isValid = false;
+                result.errors.push('タイトルは必須です');
+                return result;
+            }
+            
+            if (title.trim().length > 200) {
+                result.isValid = false;
+                result.errors.push('タイトルは200文字以内で入力してください');
+            }
+            
+            return result;
+        },
+        
+        validatePostContent: function(content) {
+            const result = {
+                isValid: true,
+                errors: []
+            };
+            
+            if (!content || content.trim() === '') {
+                result.isValid = false;
+                result.errors.push('投稿内容は必須です');
+                return result;
+            }
+            
+            if (content.trim().length > 500) {
+                result.isValid = false;
+                result.errors.push('投稿内容は500文字以内で入力してください');
+            }
+            
+            return result;
         }
     };
 })();

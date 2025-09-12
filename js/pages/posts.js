@@ -50,6 +50,33 @@
                 this.postContent.addEventListener('input', () => this.updateCharCount());
             }
             
+            // 保存ボタンのイベント追加
+            const savePostBtn = document.getElementById('savePost');
+            const cancelPostBtn = document.getElementById('cancelPost');
+            
+            if (savePostBtn) {
+                savePostBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.savePost();
+                });
+            }
+            
+            if (cancelPostBtn) {
+                cancelPostBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.closePostModal();
+                });
+            }
+            
+            // モーダル閉じるボタン
+            const modalClose = document.getElementById('modalClose');
+            if (modalClose) {
+                modalClose.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.closePostModal();
+                });
+            }
+            
             document.getElementById('modalClose')?.addEventListener('click', () => this.closePostModal());
             document.getElementById('cancelPost')?.addEventListener('click', () => this.closePostModal());
             document.getElementById('savePost')?.addEventListener('click', () => this.savePost());
@@ -238,15 +265,20 @@
             }
         },
         
+        handlePostSubmit: function(e) {
+            e.preventDefault();
+            this.savePost();
+        },
+        
         savePost: async function() {
             try {
                 const formData = new FormData(this.postForm);
                 
                 const postData = {
-                    title: formData.get('postTitle'),
-                    content: formData.get('postContent'),
-                    hashtags: formData.get('postHashtags')?.split(' ').filter(tag => tag.trim().startsWith('#')),
-                    status: formData.get('postStatus'),
+                    title: formData.get('postTitle') || '',
+                    content: formData.get('postContent') || '',
+                    hashtags: this.parseHashtags(formData.get('postHashtags') || ''),
+                    status: formData.get('postStatus') || 'draft',
                     scheduledAt: formData.get('postSchedule') || null
                 };
 
@@ -488,6 +520,51 @@
                     }
                     this.updateCharCount();
                 });
+            }
+        },
+        
+        parseHashtags: function(hashtagString) {
+            if (!hashtagString) return [];
+            
+            // スペースまたはカンマで区切り、#で始まるもののみ抽出
+            return hashtagString
+                .split(/[\s,]+/)
+                .map(tag => tag.trim())
+                .filter(tag => tag.startsWith('#') && tag.length > 1)
+                .map(tag => tag.substring(1)); // #を除去
+        },
+        
+        setButtonLoading: function(buttonId, isLoading) {
+            const button = document.getElementById(buttonId);
+            if (!button) return;
+            
+            if (isLoading) {
+                button.disabled = true;
+                button.setAttribute('data-original-text', button.textContent);
+                button.textContent = '保存中...';
+            } else {
+                button.disabled = false;
+                const originalText = button.getAttribute('data-original-text');
+                if (originalText) {
+                    button.textContent = originalText;
+                    button.removeAttribute('data-original-text');
+                }
+            }
+        },
+        
+        showFormMessage: function(message, type = 'info') {
+            const messageElement = document.getElementById('formMessage');
+            if (!messageElement) return;
+            
+            messageElement.textContent = message;
+            messageElement.className = `form-message ${type}`;
+            messageElement.style.display = 'block';
+        },
+        
+        hideFormMessage: function() {
+            const messageElement = document.getElementById('formMessage');
+            if (messageElement) {
+                messageElement.style.display = 'none';
             }
         }
     };
