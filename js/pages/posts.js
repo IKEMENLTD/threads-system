@@ -103,7 +103,7 @@
                 throw new Error('認証トークンが見つかりません');
             }
 
-            const response = await fetch(`${AppConfig.api.baseUrl}/api/posts`, {
+            const response = await fetch(`${AppConfig.api.baseUrl}/posts`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -308,8 +308,8 @@
                 const token = localStorage.getItem('threads_system_session');
                 const isEditing = this.currentEditingPostId;
                 const url = isEditing 
-                    ? `${AppConfig.api.baseUrl}/api/posts/${this.currentEditingPostId}`
-                    : `${AppConfig.api.baseUrl}/api/posts`;
+                    ? `${AppConfig.api.baseUrl}/posts/${this.currentEditingPostId}`
+                    : `${AppConfig.api.baseUrl}/posts`;
                 const method = isEditing ? 'PUT' : 'POST';
 
                 const response = await fetch(url, {
@@ -342,7 +342,7 @@
         editPost: async function(postId) {
             try {
                 const token = localStorage.getItem('threads_system_session');
-                const response = await fetch(`${AppConfig.api.baseUrl}/api/posts/${postId}`, {
+                const response = await fetch(`${AppConfig.api.baseUrl}/posts/${postId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -385,7 +385,7 @@
 
             try {
                 const token = localStorage.getItem('threads_system_session');
-                const response = await fetch(`${AppConfig.api.baseUrl}/api/posts/${postId}`, {
+                const response = await fetch(`${AppConfig.api.baseUrl}/posts/${postId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -410,7 +410,7 @@
         duplicatePost: async function(postId) {
             try {
                 const token = localStorage.getItem('threads_system_session');
-                const response = await fetch(`${AppConfig.api.baseUrl}/api/posts/${postId}/duplicate`, {
+                const response = await fetch(`${AppConfig.api.baseUrl}/posts/${postId}/duplicate`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
