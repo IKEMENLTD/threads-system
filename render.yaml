@@ -1,21 +1,30 @@
-# Render統合デプロイ設定（フロント+バック）
+# Render Threads自動化システム デプロイ設定
 services:
   - type: web
-    name: threads-system
-    runtime: node
+    name: threads-automation
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
     region: singapore
-    plan: free
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    autoDeploy: true
+    buildCommand: ""
+    startCommand: ""
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.9"
       - key: NODE_ENV
         value: production
-      - key: JWT_SECRET
-        generateValue: true
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_ANON_KEY
-        sync: false
-      - key: SUPABASE_SERVICE_KEY
-        sync: false
-    autoDeploy: true
+      - key: DISPLAY
+        value: ":99"
+      - key: DEBIAN_FRONTEND
+        value: noninteractive
+      - key: RENDER
+        value: "true"
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+    disk:
+      name: threads-automation-disk
+      mountPath: /app/data
+      sizeGB: 1
+    healthCheckPath: /status

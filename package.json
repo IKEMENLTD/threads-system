@@ -8,10 +8,18 @@
     "dev": "cd backend && npm run dev",
     "install-backend": "cd backend && npm install"
   },
-  "keywords": ["threads", "social", "automation"],
+  "keywords": [
+    "threads",
+    "social",
+    "automation"
+  ],
   "author": "Threads System",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "pg": "^8.16.3"
   }
 }

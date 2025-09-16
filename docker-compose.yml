@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # ブラウザ自動化サーバー
+  automation-server:
+    build: .
+    container_name: threads-automation
+    ports:
+      - "8888:8888"
+    environment:
+      - NODE_ENV=production
+      - HEADLESS=true
+      - DATABASE_URL=${DATABASE_URL}
+    volumes:
+      - ./screenshots:/app/screenshots
+      - ./logs:/app/logs
+      - ./data:/app/data
+    networks:
+      - threads-network
+    restart: unless-stopped
+
+  # PostgreSQLデータベース
+  postgres:
+    image: postgres:15-alpine
+    container_name: threads-db
+    environment:
+      - POSTGRES_DB=threads_system
+      - POSTGRES_USER=threads_user
+      - POSTGRES_PASSWORD=threads_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/complete-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/additional-features.sql:/docker-entrypoint-initdb.d/02-features.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - threads-network
+    restart: unless-stopped
+
+  # Redis（キャッシュ・キュー）
+  redis:
+    image: redis:7-alpine
+    container_name: threads-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - threads-network
+    restart: unless-stopped
+
+  # Nginx（リバースプロキシ）
+  nginx:
+    image: nginx:alpine
+    container_name: threads-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./test_automation.html:/usr/share/nginx/html/index.html
+    networks:
+      - threads-network
+    depends_on:
+      - automation-server
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  threads-network:
+    driver: bridge

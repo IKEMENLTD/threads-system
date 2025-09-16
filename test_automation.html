@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>Threads自動化テストパネル</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .control-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section h2 span {
+            margin-right: 10px;
+            font-size: 1.6rem;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            width: 100%;
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #f5f5f5;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-label:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+        }
+        
+        .btn-action {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 10px;
+            border: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .btn-action:active {
+            transform: translateY(0);
+        }
+        
+        .btn-test {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .btn-stop {
+            background: linear-gradient(135deg, #f44336, #da190b);
+            color: white;
+        }
+        
+        .btn-capture {
+            background: linear-gradient(135deg, #2196F3, #0d8bf2);
+            color: white;
+        }
+        
+        .status-display {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .status-display::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .status-display::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+        
+        .status-display::-webkit-scrollbar-thumb {
+            background: #4a4a4a;
+            border-radius: 5px;
+        }
+        
+        .screenshot-preview {
+            max-width: 100%;
+            margin-top: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .connection-status.connected {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .connection-status.disconnected {
+            background: #f44336;
+            color: white;
+        }
+        
+        .image-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .image-preview img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .running {
+            animation: pulse 2s infinite;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status disconnected" id="connection-status">
+        ⚡ 未接続
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Threads自動化テストパネル</h1>
+            <p>ブラウザ自動化 & OCR画像認識システム</p>
+        </div>
+        
+        <div class="control-panel">
+            <div class="section">
+                <h2><span>🔐</span> ログインテスト</h2>
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="ユーザー名 / メールアドレス">
+                    <input type="password" id="password" placeholder="パスワード">
+                    <input type="text" id="two-factor" placeholder="2段階認証コード（オプション）">
+                </div>
+                <button class="btn-action btn-test" onclick="testLogin()">
+                    <span>🔑</span> ログインテスト
+                </button>
+            </div>
+            
+            <div class="section">
+                <h2><span>📝</span> 投稿テスト</h2>
+                <textarea id="post-content" placeholder="投稿内容を入力...&#10;&#10;#ハッシュタグ も使用できます"></textarea>
+                <div class="input-group">
+                    <label class="file-label" for="post-image">
+                        📷 画像を選択（最大10枚）
+                        <input type="file" id="post-image" accept="image/*" multiple onchange="previewImages(this)">
+                    </label>
+                </div>
+                <div class="image-preview" id="image-preview"></div>
+                <button class="btn-action btn-test" onclick="testPost()">
+                    <span>📤</span> 投稿テスト
+                </button>
+            </div>
+            
+            <div class="section">
+                <h2><span>⚙️</span> 自動化制御</h2>
+                <div class="button-group">
+                    <button class="btn-action btn-start" onclick="startAutomation()">
+                        <span>▶️</span> 自動化開始
+                    </button>
+                    <button class="btn-action btn-stop" onclick="stopAutomation()">
+                        <span>⏹️</span> 停止
+                    </button>
+                    <button class="btn-action btn-capture" onclick="captureScreen()">
+                        <span>📸</span> 画面キャプチャ
+                    </button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="value" id="post-count">0</div>
+                        <div class="label">投稿数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="success-rate">0%</div>
+                        <div class="label">成功率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="uptime">00:00</div>
+                        <div class="label">稼働時間</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2><span>📊</span> ステータスログ</h2>
+                <div class="status-display" id="status-display">
+> システム起動中...
+> WebSocketサーバー接続待機中...
+</div>
+            </div>
+            
+            <div class="section" id="screenshot-section" style="display:none;">
+                <h2><span>🖼️</span> スクリーンショット</h2>
+                <img id="screenshot-preview" class="screenshot-preview">
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // グローバル変数
+        let socket = null;
+        let isConnected = false;
+        let startTime = null;
+        let postCount = 0;
+        let successCount = 0;
+        
+        // 初期化
+        window.addEventListener('DOMContentLoaded', () => {
+            connectWebSocket();
+            updateUptime();
+        });
+        
+        // WebSocket接続
+        function connectWebSocket() {
+            socket = io('http://localhost:8888', {
+                transports: ['websocket', 'polling']
+            });
+            
+            socket.on('connect', () => {
+                isConnected = true;
+                updateConnectionStatus(true);
+                addStatus('✅ サーバー接続成功', 'success');
+            });
+            
+            socket.on('disconnect', () => {
+                isConnected = false;
+                updateConnectionStatus(false);
+                addStatus('❌ サーバー接続が切断されました', 'error');
+            });
+            
+            socket.on('status', (data) => {
+                addStatus(data.message, 'info');
+            });
+            
+            socket.on('screenshot', (data) => {
+                displayScreenshot(data.image);
+            });
+            
+            socket.on('error', (data) => {
+                addStatus('❌ エラー: ' + data.message, 'error');
+            });
+        }
+        
+        // 接続状態更新
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connection-status');
+            if (connected) {
+                statusEl.className = 'connection-status connected';
+                statusEl.textContent = '⚡ 接続済み';
+            } else {
+                statusEl.className = 'connection-status disconnected';
+                statusEl.textContent = '⚡ 未接続';
+            }
+        }
+        
+        // ステータス追加
+        function addStatus(message, type = 'info') {
+            const statusDisplay = document.getElementById('status-display');
+            const timestamp = new Date().toLocaleTimeString('ja-JP');
+            
+            let prefix = '>';
+            let color = '#00ff00';
+            
+            switch(type) {
+                case 'error':
+                    prefix = '❌';
+                    color = '#ff4444';
+                    break;
+                case 'success':
+                    prefix = '✅';
+                    color = '#44ff44';
+                    break;
+                case 'warning':
+                    prefix = '⚠️';
+                    color = '#ffaa44';
+                    break;
+            }
+            
+            const line = `<span style="color: ${color}">${prefix} [${timestamp}] ${message}</span>\n`;
+            statusDisplay.innerHTML += line;
+            statusDisplay.scrollTop = statusDisplay.scrollHeight;
+        }
+        
+        // ログインテスト
+        function testLogin() {
+            if (!isConnected) {
+                alert('サーバーに接続されていません');
+                return;
+            }
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const twoFactor = document.getElementById('two-factor').value;
+            
+            if (!username || !password) {
+                alert('ユーザー名とパスワードを入力してください');
+                return;
+            }
+            
+            socket.emit('test_login', {
+                username: username,
+                password: password,
+                two_factor_code: twoFactor
+            });
+            
+            addStatus('🔐 ログインテスト開始...', 'info');
+        }
+        
+        // 投稿テスト
+        function testPost() {
+            if (!isConnected) {
+                alert('サーバーに接続されていません');
+                return;
+            }
+            
+            const content = document.getElementById('post-content').value;
+            const files = document.getElementById('post-image').files;
+            
+            if (!content && files.length === 0) {
+                alert('投稿内容または画像を入力してください');
+                return;
+            }
+            
+            // 画像をBase64に変換
+            const images = [];
+            let processed = 0;
+            
+            if (files.length > 0) {
+                for (let file of files) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        images.push(e.target.result);
+                        processed++;
+                        
+                        if (processed === files.length) {
+                            sendPost(content, images);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                sendPost(content, images);
+            }
+        }
+        
+        function sendPost(content, images) {
+            socket.emit('test_post', {
+                content: content,
+                images: images
+            });
+            
+            addStatus('📝 投稿テスト開始...', 'info');
+            postCount++;
+            updateStats();
+        }
+        
+        // 自動化開始
+        function startAutomation() {
+            if (!isConnected) {
+                alert('サーバーに接続されていません');
+                return;
+            }
+            
+            socket.emit('start_automation', {});
+            addStatus('🚀 自動化プロセス開始...', 'success');
+            startTime = new Date();
+            
+            document.querySelector('.btn-start').classList.add('running');
+        }
+        
+        // 自動化停止
+        function stopAutomation() {
+            if (!isConnected) {
+                alert('サーバーに接続されていません');
+                return;
+            }
+            
+            socket.emit('stop_automation', {});
+            addStatus('⏹️ 自動化プロセス停止', 'warning');
+            
+            document.querySelector('.btn-start').classList.remove('running');
+        }
+        
+        // 画面キャプチャ
+        function captureScreen() {
+            if (!isConnected) {
+                alert('サーバーに接続されていません');
+                return;
+            }
+            
+            socket.emit('capture_screen', {});
+            addStatus('📸 画面キャプチャ中...', 'info');
+        }
+        
+        // スクリーンショット表示
+        function displayScreenshot(imageData) {
+            const section = document.getElementById('screenshot-section');
+            const preview = document.getElementById('screenshot-preview');
+            
+            section.style.display = 'block';
+            preview.src = imageData;
+            
+            addStatus('📸 スクリーンショット取得完了', 'success');
+        }
+        
+        // 画像プレビュー
+        function previewImages(input) {
+            const preview = document.getElementById('image-preview');
+            preview.innerHTML = '';
+            
+            if (input.files) {
+                for (let file of input.files) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+        
+        // 統計更新
+        function updateStats() {
+            document.getElementById('post-count').textContent = postCount;
+            
+            const rate = postCount > 0 ? Math.round((successCount / postCount) * 100) : 0;
+            document.getElementById('success-rate').textContent = rate + '%';
+        }
+        
+        // 稼働時間更新
+        function updateUptime() {
+            setInterval(() => {
+                if (startTime) {
+                    const diff = new Date() - startTime;
+                    const hours = Math.floor(diff / 3600000);
+                    const minutes = Math.floor((diff % 3600000) / 60000);
+                    document.getElementById('uptime').textContent = 
+                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

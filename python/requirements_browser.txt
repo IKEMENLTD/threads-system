@@ -1,0 +1,58 @@
+# ブラウザ自動化用パッケージ
+# pip install -r requirements_browser.txt
+
+# Selenium関連
+selenium==4.16.0
+undetected-chromedriver==3.5.4
+webdriver-manager==4.0.1
+
+# OCR・画像認識
+pytesseract==0.3.10
+opencv-python==4.8.1.78
+Pillow==10.1.0
+
+# WebSocketサーバー
+aiohttp==3.9.1
+aiohttp-cors==0.7.0
+python-socketio==5.10.0
+
+# データベース
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+
+# タスクキュー
+celery==5.3.4
+redis==5.0.1
+
+# ユーティリティ
+python-dotenv==1.0.0
+python-dateutil==2.8.2
+pytz==2023.3
+
+# ロギング
+loguru==0.7.2
+colorama==0.4.6
+
+# セキュリティ
+cryptography==41.0.7
+bcrypt==4.1.2
+
+# 開発・デバッグ
+ipython==8.18.1
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# 人間的動作シミュレーション
+pyautogui==0.9.54
+pynput==1.7.6
+
+# 仮想ディスプレイ (Linux/WSL用)
+pyvirtualdisplay==3.0
+
+# プロキシ対応
+pysocks==1.7.1
+urllib3==2.1.0
+
+# キャプチャ対策（オプション）
+# 2captcha-python==1.2.1
+# anticaptchaofficial==1.0.47

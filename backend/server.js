@@ -1,7 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
+
+const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -31,166 +34,290 @@ app.get('/api/test', (req, res) => {
     });
 });
 
-// Mock authentication
-app.post('/api/auth/login', (req, res) => {
-    const { email, password } = req.body;
-    
-    // 簡単な認証（実際の本番環境では適切な認証を実装）
-    if (email && password) {
+// Authentication with database
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                error: 'メールアドレスとパスワードを入力してください'
+            });
+        }
+
+        // データベースからユーザーを取得
+        const user = await db.users.findByEmail(email);
+        
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                error: 'メールアドレスまたはパスワードが正しくありません'
+            });
+        }
+
+        // パスワード検証
+        const isValidPassword = await bcrypt.compare(password, user.password_hash);
+        
+        if (!isValidPassword) {
+            return res.status(401).json({
+                success: false,
+                error: 'メールアドレスまたはパスワードが正しくありません'
+            });
+        }
+
+        // 最終ログイン時刻を更新
+        await db.users.updateLastLogin(user.id);
+
+        // JWTトークン生成（簡易版）
+        const token = 'jwt-' + user.id + '-' + Date.now();
+
         res.json({
             success: true,
-            token: 'mock-jwt-token-' + Date.now(),
+            token: token,
             user: {
-                id: '1',
-                email: email,
-                username: email.split('@')[0],
-                role: 'user',
-                createdAt: new Date().toISOString()
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                createdAt: user.created_at
             }
         });
-    } else {
-        res.status(401).json({
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({
             success: false,
-            error: 'メールアドレスまたはパスワードが正しくありません'
+            error: 'ログイン処理中にエラーが発生しました'
         });
     }
 });
 
-// Mock posts storage (in-memory for now)
-let posts = [];
-let nextId = 1;
+// User registration
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { email, username, password, fullName } = req.body;
+        
+        if (!email || !username || !password) {
+            return res.status(400).json({
+                success: false,
+                error: '必須項目を入力してください'
+            });
+        }
 
-// Get all posts
-app.get('/api/posts', (req, res) => {
-    res.json({
-        success: true,
-        posts: posts
-    });
+        // パスワードハッシュ化
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        // ユーザー作成
+        const newUser = await db.users.create({
+            email,
+            username,
+            passwordHash,
+            fullName
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'ユーザー登録が完了しました',
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                username: newUser.username
+            }
+        });
+    } catch (error) {
+        console.error('Registration error:', error);
+        if (error.code === '23505') { // PostgreSQL unique violation
+            res.status(409).json({
+                success: false,
+                error: 'このメールアドレスまたはユーザー名は既に使用されています'
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: '登録処理中にエラーが発生しました'
+            });
+        }
+    }
 });
 
-// Get single post
-app.get('/api/posts/:id', (req, res) => {
-    const post = posts.find(p => p.id === req.params.id);
-    if (post) {
+// Get all posts from database
+app.get('/api/posts', async (req, res) => {
+    try {
+        const { status, limit } = req.query;
+        const filters = {};
+        
+        if (status && status !== 'all') {
+            filters.status = status;
+        }
+        if (limit) {
+            filters.limit = parseInt(limit);
+        }
+
+        const posts = await db.posts.findAll(null, filters);
+        
         res.json({
             success: true,
-            post: post
+            posts: posts
         });
-    } else {
-        res.status(404).json({
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        res.status(500).json({
             success: false,
-            error: '投稿が見つかりません'
+            error: '投稿の取得中にエラーが発生しました'
         });
     }
 });
 
-// Create new post
-app.post('/api/posts', (req, res) => {
-    const { title, content, hashtags, status, scheduledAt } = req.body;
-    
-    if (!title || !content) {
-        return res.status(400).json({
+// Get single post from database
+app.get('/api/posts/:id', async (req, res) => {
+    try {
+        const post = await db.posts.findById(req.params.id);
+        
+        if (post) {
+            res.json({
+                success: true,
+                post: post
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                error: '投稿が見つかりません'
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching post:', error);
+        res.status(500).json({
             success: false,
-            error: 'タイトルと内容は必須です'
+            error: '投稿の取得中にエラーが発生しました'
         });
     }
-    
-    const newPost = {
-        id: String(nextId++),
-        title,
-        content,
-        hashtags: hashtags || [],
-        status: status || 'draft',
-        scheduledAt: scheduledAt || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-    };
-    
-    posts.push(newPost);
-    
-    res.status(201).json({
-        success: true,
-        post: newPost,
-        message: '投稿を作成しました'
-    });
 });
 
-// Update post
-app.put('/api/posts/:id', (req, res) => {
-    const postIndex = posts.findIndex(p => p.id === req.params.id);
-    
-    if (postIndex === -1) {
-        return res.status(404).json({
+// Create new post in database
+app.post('/api/posts', async (req, res) => {
+    try {
+        const { title, content, hashtags, status, scheduledAt } = req.body;
+        
+        if (!title || !content) {
+            return res.status(400).json({
+                success: false,
+                error: 'タイトルと内容は必須です'
+            });
+        }
+        
+        // TODO: Get actual user ID from JWT token
+        // For now, use a default user ID or get from request
+        const userId = req.body.userId || '00000000-0000-0000-0000-000000000001';
+        
+        const newPost = await db.posts.create({
+            userId,
+            title,
+            content,
+            hashtags: hashtags || [],
+            status: status || 'draft',
+            scheduledAt: scheduledAt || null
+        });
+        
+        res.status(201).json({
+            success: true,
+            post: newPost,
+            message: '投稿を作成しました'
+        });
+    } catch (error) {
+        console.error('Error creating post:', error);
+        res.status(500).json({
             success: false,
-            error: '投稿が見つかりません'
+            error: '投稿の作成中にエラーが発生しました'
         });
     }
-    
-    const { title, content, hashtags, status, scheduledAt } = req.body;
-    
-    posts[postIndex] = {
-        ...posts[postIndex],
-        title: title || posts[postIndex].title,
-        content: content || posts[postIndex].content,
-        hashtags: hashtags || posts[postIndex].hashtags,
-        status: status || posts[postIndex].status,
-        scheduledAt: scheduledAt || posts[postIndex].scheduledAt,
-        updatedAt: new Date().toISOString()
-    };
-    
-    res.json({
-        success: true,
-        post: posts[postIndex],
-        message: '投稿を更新しました'
-    });
 });
 
-// Delete post
-app.delete('/api/posts/:id', (req, res) => {
-    const postIndex = posts.findIndex(p => p.id === req.params.id);
-    
-    if (postIndex === -1) {
-        return res.status(404).json({
-            success: false,
-            error: '投稿が見つかりません'
+// Update post in database
+app.put('/api/posts/:id', async (req, res) => {
+    try {
+        const { title, content, hashtags, status, scheduledAt } = req.body;
+        
+        const updatedPost = await db.posts.update(req.params.id, {
+            title,
+            content,
+            hashtags,
+            status,
+            scheduledAt
         });
+        
+        res.json({
+            success: true,
+            post: updatedPost,
+            message: '投稿を更新しました'
+        });
+    } catch (error) {
+        console.error('Error updating post:', error);
+        if (error.message === 'Post not found') {
+            res.status(404).json({
+                success: false,
+                error: '投稿が見つかりません'
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: '投稿の更新中にエラーが発生しました'
+            });
+        }
     }
-    
-    posts.splice(postIndex, 1);
-    
-    res.json({
-        success: true,
-        message: '投稿を削除しました'
-    });
 });
 
-// Duplicate post
-app.post('/api/posts/:id/duplicate', (req, res) => {
-    const post = posts.find(p => p.id === req.params.id);
-    
-    if (!post) {
-        return res.status(404).json({
+// Delete post (soft delete) in database
+app.delete('/api/posts/:id', async (req, res) => {
+    try {
+        const result = await db.posts.delete(req.params.id);
+        
+        if (result) {
+            res.json({
+                success: true,
+                message: '投稿を削除しました'
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                error: '投稿が見つかりません'
+            });
+        }
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        res.status(500).json({
             success: false,
-            error: '投稿が見つかりません'
+            error: '投稿の削除中にエラーが発生しました'
         });
     }
-    
-    const duplicatedPost = {
-        ...post,
-        id: String(nextId++),
-        title: post.title + ' (コピー)',
-        status: 'draft',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-    };
-    
-    posts.push(duplicatedPost);
-    
-    res.json({
-        success: true,
-        post: duplicatedPost,
-        message: '投稿を複製しました'
-    });
+});
+
+// Duplicate post in database
+app.post('/api/posts/:id/duplicate', async (req, res) => {
+    try {
+        // TODO: Get actual user ID from JWT token
+        const userId = req.body.userId || '00000000-0000-0000-0000-000000000001';
+        
+        const duplicatedPost = await db.posts.duplicate(req.params.id, userId);
+        
+        res.json({
+            success: true,
+            post: duplicatedPost,
+            message: '投稿を複製しました'
+        });
+    } catch (error) {
+        console.error('Error duplicating post:', error);
+        if (error.message === 'Post not found') {
+            res.status(404).json({
+                success: false,
+                error: '投稿が見つかりません'
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: '投稿の複製中にエラーが発生しました'
+            });
+        }
+    }
 });
 
 // =========================
@@ -236,8 +363,8 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start server
-const server = app.listen(PORT, '0.0.0.0', () => {
+// Start server with database initialization
+const server = app.listen(PORT, '0.0.0.0', async () => {
     console.log('=====================================');
     console.log('🚀 Threads System Backend Started!');
     console.log('=====================================');
@@ -245,6 +372,16 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`✅ Health check: http://localhost:${PORT}/health`);
     console.log(`📝 API Test: http://localhost:${PORT}/api/test`);
+    console.log('=====================================');
+    
+    // データベース初期化
+    console.log('🔄 Initializing database connection...');
+    const dbInitialized = await db.initializeDatabase();
+    if (dbInitialized) {
+        console.log('✅ Database connection established');
+    } else {
+        console.log('⚠️  Database connection failed - using fallback mode');
+    }
     console.log('=====================================');
 });
 
