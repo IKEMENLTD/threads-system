@@ -2,10 +2,10 @@ const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 // Supabase client initialization
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY
-);
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://qjjnkclpqpybnnjswlhq.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqam5rY2xxcXB5Ym5uanN3bGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc2NjEyNzYsImV4cCI6MjA1MzIzNzI3Nn0.RLZ5Uh7xVWWl6w-WJc1Ni_CgbXRdB_qGGnZmO8Qx7R4';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Database connection test
 const testConnection = async () => {
@@ -83,6 +83,19 @@ const users = {
             .eq('id', userId)
             .select()
             .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    // Update last login time
+    updateLastLogin: async (userId) => {
+        const { data, error } = await supabase
+            .from('users')
+            .update({
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId);
 
         if (error) throw error;
         return data;

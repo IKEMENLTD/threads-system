@@ -4,15 +4,34 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
-const db = require('./database');
+// Use Supabase database client
+const db = require('./supabase-database');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Security headers
+app.use((req, res, next) => {
+    res.setHeader('Content-Security-Policy',
+        "default-src 'self'; " +
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://code.getmdl.io https://cdn.jsdelivr.net; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://code.getmdl.io https://cdn.jsdelivr.net https://unpkg.com; " +
+        "font-src 'self' https://fonts.gstatic.com; " +
+        "img-src 'self' data: https:; " +
+        "connect-src 'self' https://qjjnkclpqpybnnjswlhq.supabase.co wss://qjjnkclpqpybnnjswlhq.supabase.co"
+    );
+    next();
+});
 
 // Static files - serve frontend
 app.use(express.static(path.join(__dirname, '../')));
