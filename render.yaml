@@ -20,6 +20,16 @@ services:
         value: noninteractive
       - key: RENDER
         value: "true"
+      - key: JWT_SECRET
+        value: threads-secret-key-2024-render-xyz789
+      - key: SUPABASE_URL
+        value: https://qjjnkclpqpybnnjswlhq.supabase.co
+      - key: SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqam5rY2xxcXB5Ym5uanN3bGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc2NjEyNzYsImV4cCI6MjA1MzIzNzI3Nn0.RLZ5Uh7xVWWl6w-WJc1Ni_CgbXRdB_qGGnZmO8Qx7R4
+      - key: SUPABASE_SERVICE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqam5rY2xxcXB5Ym5uanN3bGhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNzY2MTI3NiwiZXhwIjoyMDUzMjM3Mjc2fQ.aZ2Q8hP9YvJKIR1C_4WrX6S3LjKvM9B5Fn0Hq7Rt2Ew
+      - key: CHROME_EXECUTABLE_PATH
+        value: /usr/bin/google-chrome-stable
     scaling:
       minInstances: 1
       maxInstances: 1
