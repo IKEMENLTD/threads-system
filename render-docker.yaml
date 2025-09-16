@@ -1,13 +1,15 @@
-# Render Threads自動化システム デプロイ設定
+# Render Threads自動化システム デプロイ設定 (Docker版)
+# Python自動化機能を含む完全版
 services:
   - type: web
-    name: threads-automation
-    env: node
+    name: threads-automation-docker
+    env: docker
+    dockerfilePath: ./Dockerfile
     plan: starter
     region: singapore
     autoDeploy: true
-    buildCommand: "npm install"
-    startCommand: "npm start"
+    buildCommand: ""
+    startCommand: ""
     envVars:
       - key: PYTHON_VERSION
         value: "3.9"
@@ -36,4 +38,4 @@ services:
       name: threads-automation-disk
       mountPath: /app/data
       sizeGB: 1
-    healthCheckPath: /status
+    healthCheckPath: /health
